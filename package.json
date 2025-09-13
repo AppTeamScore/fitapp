@@ -60,14 +60,5 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "start": "serve -s dist",
-    "serve": "serve -s dist",
-    "install-serve": "npm install -g serve",
-    "postinstall": "npm run install-serve",
-    "preinstall": "npm install -g serve",
-    "prestart": "npm run build",
-    "prebuild": "npm install",
-    "postbuild": "npm run serve",
-    "prestop": "npm run stop"
   }
 }
