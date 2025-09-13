@@ -288,6 +288,7 @@ export function ManualWorkoutPlanPage({ onNavigate, onStartWorkout }: ManualWork
         weight: ex.weight
       }))
     };
+    console.log('Запускаем пользовательскую тренировку:', workoutData);
     onStartWorkout(workoutData);
   };
 

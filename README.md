@@ -1,39 +1,11 @@
-# Тренировочное мобильное приложение
 
-## Описание
-Это приложение предназначено для отслеживания тренировок и прогресса в фитнесе.
+  # Тренировочное мобильное приложение
 
-## Установка
+  This is a code bundle for Тренировочное мобильное приложение. The original project is available at https://www.figma.com/design/HfWz1xoo42ZZ66KViA3hdm/%D0%A2%D1%80%D0%B5%D0%BD%D0%B8%D1%80%D0%BE%D0%B2%D0%BE%D1%87%D0%BD%D0%BE%D0%B5-%D0%BC%D0%BE%D0%B1%D0%B8%D0%BB%D1%8C%D0%BD%D0%BE%D0%B5-%D0%BF%D1%80%D0%B8%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D0%B5.
 
-### Требования
-- Docker
-- Docker Compose
+  ## Running the code
 
-### Инструкции по развертыванию
+  Run `npm i` to install the dependencies.
 
-1. Клонируйте репозиторий:
-   ```bash
-   git clone https://github.com/ваш-репозиторий.git
-   cd ваш-репозиторий
-   ```
-
-2. Создайте файл `.env` и настройте переменные окружения:
-   ```bash
-   cp .env.example .env
-   ```
-
-3. Запустите приложение с помощью Docker Compose:
-   ```bash
-   docker-compose up --build
-   ```
-
-4. Откройте приложение в браузере:
-   ```
-   http://localhost:3000
-   ```
-
-## Использование
-Описание основных функций приложения.
-
-## Лицензия
-MIT
+  Run `npm run dev` to start the development server.
+  
