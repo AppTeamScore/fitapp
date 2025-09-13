@@ -147,7 +147,7 @@ export function WorkoutPlanPage({ onNavigate, onStartWorkout }: WorkoutPlanPageP
   const handleStartWorkout = (dayWorkout: any) => {
     // Находим упражнения из нашей базы данных
     const workoutExercises = dayWorkout.exercises.map((planExercise: any) => {
-      const foundExercise = exercises.find(ex =>
+      const foundExercise = exercises.find(ex => 
         ex.name.toLowerCase().includes(planExercise.name.toLowerCase()) ||
         planExercise.name.toLowerCase().includes(ex.name.toLowerCase())
       );
@@ -164,18 +164,12 @@ export function WorkoutPlanPage({ onNavigate, onStartWorkout }: WorkoutPlanPageP
     }).filter(Boolean);
 
     const workout = {
-      id: Date.now(),
       name: dayWorkout.workoutName,
       duration: dayWorkout.totalDuration,
-      exercises: workoutExercises.length,
-      exercises_list: workoutExercises,
-      difficulty: 'medium',
-      category: 'Тренировка по плану',
-      description: dayWorkout.workoutName
+      exercises: workoutExercises,
+      difficulty: 'medium'
     };
 
-    console.log('WorkoutPlanPage запускает тренировку:', workout);
-    console.log('Exercises list:', workoutExercises);
     onStartWorkout(workout);
   };
 

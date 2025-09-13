@@ -22,12 +22,28 @@ export function TimerPage({ onNavigate, workout }: TimerPageProps) {
   const [completedExercises, setCompletedExercises] = useState(0);
   const [workoutStartTime, setWorkoutStartTime] = useState<Date | null>(null);
 
-  // Используем упражнения из тренировки, если они есть, иначе пустой массив
-  const exercises = workout?.exercises_list || [];
-  
-  // Для отладки
-  console.log('TimerPage получена тренировка:', workout);
-  console.log('Exercises list:', exercises);
+  const exercises = workout?.exercises_list || [
+    { 
+      id: "default_1",
+      name: "Прыжки на месте", 
+      duration: 30, 
+      rest: 15,
+      video: "default.mp4",
+      category: "Кардио",
+      difficulty: "Легко",
+      muscleGroups: ["Все тело"]
+    },
+    { 
+      id: "default_2",
+      name: "Приседания", 
+      duration: 30, 
+      rest: 15,
+      video: "default.mp4",
+      category: "Сила",
+      difficulty: "Легко",
+      muscleGroups: ["Ноги"]
+    },
+  ];
 
   const currentExercise = exercises[currentExerciseIndex] || exercises[0];
   const totalExercises = exercises.length;
