@@ -59,6 +59,9 @@
   },
   "scripts": {
     "dev": "vite",
-    "build": "vite build"
+    "build": "vite build",
+    "prebuild": "cp -r src/videos/* public/videos/ 2>/dev/null || true",
+    "docker:build": "docker build -t myfitapp:latest .",
+    "docker:run": "docker run -d -p 8080:80 --name myfitapp myfitapp:latest"
   }
 }

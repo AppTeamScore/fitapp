@@ -52,6 +52,22 @@
     build: {
       target: 'esnext',
       outDir: 'build',
+      // Копируем статические файлы (включая видео) в папку сборки
+      assetsDir: 'assets',
+      rollupOptions: {
+        output: {
+          manualChunks: undefined,
+          assetFileNames: (assetInfo: any) => {
+            if (assetInfo.name?.endsWith('.mp4')) {
+              return 'videos/[name][extname]';
+            }
+            if (assetInfo.name?.endsWith('.png') || assetInfo.name?.endsWith('.jpg') || assetInfo.name?.endsWith('.jpeg') || assetInfo.name?.endsWith('.gif') || assetInfo.name?.endsWith('.svg')) {
+              return 'assets/images/[name][extname]';
+            }
+            return 'assets/[name][extname]';
+          }
+        }
+      }
     },
     server: {
       port: 3000,
