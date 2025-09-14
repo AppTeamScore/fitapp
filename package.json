@@ -53,15 +53,13 @@
     "vite": "*"
   },
   "devDependencies": {
-    "@types/node": "^20.19.14",
+    "@types/node": "^20.10.0",
+    "@types/react": "^19.1.13",
     "@vitejs/plugin-react-swc": "^3.10.2",
     "vite": "6.3.5"
   },
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
-    "prebuild": "cp -r src/videos/* public/videos/ 2>/dev/null || true",
-    "docker:build": "docker build -t myfitapp:latest .",
-    "docker:run": "docker run -d -p 8080:80 --name myfitapp myfitapp:latest"
+    "build": "vite build"
   }
 }

@@ -1,15 +1,18 @@
 import { useState, useEffect } from 'react';
-import { HomePage } from './components/HomePage';
-import { WorkoutsPage } from './components/WorkoutsPage';
-import { TimerPage } from './components/TimerPage';
-import { CalendarPage } from './components/CalendarPage';
-import { ExercisesLibraryPage } from './components/ExercisesLibraryPage';
-import { AuthPage } from './components/AuthPage';
-import { OnboardingForm } from './components/OnboardingForm';
-import { WorkoutPlanPage } from './components/WorkoutPlanPage';
-import { ManualWorkoutPlanPage } from './components/ManualWorkoutPlanPage';
-import { StatsPage } from './components/StatsPage';
-import { AccountPage } from './components/AccountPage';
+import { lazy, Suspense } from 'react';
+import { LoadingSpinner } from './components/LoadingSpinner';
+
+const HomePage = lazy(() => import('./components/HomePage'));
+const WorkoutsPage = lazy(() => import('./components/WorkoutsPage'));
+const TimerPage = lazy(() => import('./components/TimerPage'));
+const CalendarPage = lazy(() => import('./components/CalendarPage'));
+const ExercisesLibraryPage = lazy(() => import('./components/ExercisesLibraryPage'));
+const AuthPage = lazy(() => import('./components/AuthPage'));
+const OnboardingForm = lazy(() => import('./components/OnboardingForm'));
+const WorkoutPlanPage = lazy(() => import('./components/WorkoutPlanPage'));
+const ManualWorkoutPlanPage = lazy(() => import('./components/ManualWorkoutPlanPage'));
+const StatsPage = lazy(() => import('./components/StatsPage'));
+const AccountPage = lazy(() => import('./components/AccountPage'));
 import { BottomNavigation } from './components/BottomNavigation';
 import { Toaster } from './components/ui/sonner';
 import ErrorBoundary from './components/ErrorBoundary';
@@ -105,20 +108,46 @@ export default function App() {
       case 'loading':
         return <LoadingSpinner message="Загрузка приложения..." />;
       case 'auth':
-        return <AuthPage onAuthSuccess={handleAuthSuccess} />;
+        return (
+          <Suspense fallback={<LoadingSpinner message="Загрузка..." />}>
+            <AuthPage onAuthSuccess={handleAuthSuccess} />
+          </Suspense>
+        );
       case 'onboarding':
-        return <OnboardingForm user={user} onComplete={handleOnboardingComplete} />;
+        return (
+          <Suspense fallback={<LoadingSpinner message="Загрузка..." />}>
+            <OnboardingForm user={user} onComplete={handleOnboardingComplete} />
+          </Suspense>
+        );
       case 'home':
-        return <HomePage onNavigate={handleNavigate} user={user} onLogout={handleLogout} />;
+        return (
+          <Suspense fallback={<LoadingSpinner message="Загрузка..." />}>
+            <HomePage onNavigate={handleNavigate} user={user} onLogout={handleLogout} />
+          </Suspense>
+        );
       case 'workouts':
-        return <WorkoutsPage onNavigate={handleNavigate} onStartWorkout={handleStartWorkout} />;
+        return (
+          <Suspense fallback={<LoadingSpinner message="Загрузка..." />}>
+            <WorkoutsPage onNavigate={handleNavigate} onStartWorkout={handleStartWorkout} />
+          </Suspense>
+        );
       case 'plan':
-        return <WorkoutPlanPage onNavigate={handleNavigate} onStartWorkout={handleStartWorkout} />;
+        return (
+          <Suspense fallback={<LoadingSpinner message="Загрузка..." />}>
+            <WorkoutPlanPage onNavigate={handleNavigate} onStartWorkout={handleStartWorkout} />
+          </Suspense>
+        );
       case 'manual-plan':
-        return <ManualWorkoutPlanPage onNavigate={handleNavigate} onStartWorkout={handleStartWorkout} />;
+        return (
+          <Suspense fallback={<LoadingSpinner message="Загрузка..." />}>
+            <ManualWorkoutPlanPage onNavigate={handleNavigate} onStartWorkout={handleStartWorkout} />
+          </Suspense>
+        );
       case 'timer':
         return currentWorkout ? (
-          <TimerPage onNavigate={handleNavigate} workout={currentWorkout} />
+          <Suspense fallback={<LoadingSpinner message="Загрузка..." />}>
+            <TimerPage onNavigate={handleNavigate} workout={currentWorkout} />
+          </Suspense>
         ) : (
           <div className="min-h-screen flex items-center justify-center p-4">
             <div className="text-center">
@@ -126,7 +155,7 @@ export default function App() {
               <p className="text-muted-foreground mb-4">
                 Пожалуйста, выберите тренировку для начала.
               </p>
-              <button 
+              <button
                 onClick={() => handleNavigate('home')}
                 className="px-4 py-2 bg-primary text-primary-foreground rounded-md"
               >
@@ -136,15 +165,35 @@ export default function App() {
           </div>
         );
       case 'calendar':
-        return <CalendarPage onNavigate={handleNavigate} />;
+        return (
+          <Suspense fallback={<LoadingSpinner message="Загрузка..." />}>
+            <CalendarPage onNavigate={handleNavigate} />
+          </Suspense>
+        );
       case 'exercises':
-        return <ExercisesLibraryPage onNavigate={handleNavigate} onStartWorkout={handleStartWorkout} />;
+        return (
+          <Suspense fallback={<LoadingSpinner message="Загрузка..." />}>
+            <ExercisesLibraryPage onNavigate={handleNavigate} onStartWorkout={handleStartWorkout} />
+          </Suspense>
+        );
       case 'stats':
-        return <StatsPage onNavigate={handleNavigate} />;
+        return (
+          <Suspense fallback={<LoadingSpinner message="Загрузка..." />}>
+            <StatsPage onNavigate={handleNavigate} />
+          </Suspense>
+        );
       case 'account':
-        return <AccountPage onNavigate={handleNavigate} onLogout={handleLogout} user={user} />;
+        return (
+          <Suspense fallback={<LoadingSpinner message="Загрузка..." />}>
+            <AccountPage onNavigate={handleNavigate} onLogout={handleLogout} user={user} />
+          </Suspense>
+        );
       default:
-        return <HomePage onNavigate={handleNavigate} user={user} onLogout={handleLogout} />;
+        return (
+          <Suspense fallback={<LoadingSpinner message="Загрузка..." />}>
+            <HomePage onNavigate={handleNavigate} user={user} onLogout={handleLogout} />
+          </Suspense>
+        );
     }
   };
 
