@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { lazy, Suspense } from 'react';
 import { LoadingSpinner } from './components/LoadingSpinner';
+import React from 'react';
 
 const HomePage = lazy(() => import('./components/HomePage'));
 const WorkoutsPage = lazy(() => import('./components/WorkoutsPage'));
@@ -16,7 +17,7 @@ const AccountPage = lazy(() => import('./components/AccountPage'));
 import { BottomNavigation } from './components/BottomNavigation';
 import { Toaster } from './components/ui/sonner';
 import ErrorBoundary from './components/ErrorBoundary';
-import { LoadingSpinner } from './components/LoadingSpinner';
+// Removed duplicate import
 import { supabase } from './utils/supabase/client';
 import { projectId } from './utils/supabase/info';
 import { Workout } from './data/workouts';
@@ -144,25 +145,10 @@ export default function App() {
           </Suspense>
         );
       case 'timer':
-        return currentWorkout ? (
+        return (
           <Suspense fallback={<LoadingSpinner message="Загрузка..." />}>
-            <TimerPage onNavigate={handleNavigate} workout={currentWorkout} />
+            <TimerPage onNavigate={handleNavigate} workout={currentWorkout || {}} />
           </Suspense>
-        ) : (
-          <div className="min-h-screen flex items-center justify-center p-4">
-            <div className="text-center">
-              <h2 className="text-xl font-semibold mb-2">Тренировка не выбрана</h2>
-              <p className="text-muted-foreground mb-4">
-                Пожалуйста, выберите тренировку для начала.
-              </p>
-              <button
-                onClick={() => handleNavigate('home')}
-                className="px-4 py-2 bg-primary text-primary-foreground rounded-md"
-              >
-                Вернуться на главную
-              </button>
-            </div>
-          </div>
         );
       case 'calendar':
         return (
