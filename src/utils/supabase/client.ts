@@ -1,0 +1,20 @@
+import { createClient } from '@supabase/supabase-js';
+
+// Получаем переменные окружения с fallback значениями
+const getSupabaseUrl = (): string => {
+  try {
+    return import.meta.env?.VITE_SUPABASE_URL || 'https://jyqhcwqlpjrhibkyybjn.supabase.co';
+  } catch {
+    return 'https://jyqhcwqlpjrhibkyybjn.supabase.co';
+  }
+};
+
+const getSupabaseKey = (): string => {
+  try {
+    return import.meta.env?.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp5cWhjd3FscGpyaGlia3l5YmpuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTcwNTk0MzIsImV4cCI6MjA3MjYzNTQzMn0.aB5BEmbAQCnr-F_CS0Ji8krJeTL69mI9T34FicjHAfY';
+  } catch {
+    return 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp5cWhjd3FscGpyaGlia3l5YmpuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTcwNTk0MzIsImV4cCI6MjA3MjYzNTQzMn0.aB5BEmbAQCnr-F_CS0Ji8krJeTL69mI9T34FicjHAfY';
+  }
+};
+
+export const supabase = createClient(getSupabaseUrl(), getSupabaseKey());
