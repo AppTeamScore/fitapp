@@ -66,7 +66,7 @@ export function ManualWorkoutPlanPage({ onNavigate, onStartWorkout }: ManualWork
       const { data: { session } } = await supabase.auth.getSession();
       if (!session?.access_token) return;
 
-      const response = await fetch(`https://${projectId}.supabase.co/functions/v1/make-server-c6c9ad1a/manual-workout-plan`, {
+      const response = await fetch(`https://${projectId}.supabase.co/functions/v1/make-server-c6c9ad1a/workout-plan`, {
         headers: {
           'Authorization': `Bearer ${session.access_token}`
         }
@@ -231,7 +231,7 @@ export function ManualWorkoutPlanPage({ onNavigate, onStartWorkout }: ManualWork
         recommendations: 'Персональный план тренировок'
       };
 
-      const response = await fetch(`https://${projectId}.supabase.co/functions/v1/make-server-c6c9ad1a/manual-workout-plan`, {
+      const response = await fetch(`https://${projectId}.supabase.co/functions/v1/make-server-c6c9ad1a/workout-plan`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -324,7 +324,7 @@ export function ManualWorkoutPlanPage({ onNavigate, onStartWorkout }: ManualWork
         recommendations: 'Персональный план тренировок'
       };
 
-      const response = await fetch(`https://${projectId}.supabase.co/functions/v1/make-server-c6c9ad1a/manual-workout-plan`, {
+      const response = await fetch(`https://${projectId}.supabase.co/functions/v1/make-server-c6c9ad1a/workout-plan`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
