@@ -66,7 +66,7 @@ export function ManualWorkoutPlanPage({ onNavigate, onStartWorkout }: ManualWork
       const { data: { session } } = await supabase.auth.getSession();
       if (!session?.access_token) return;
 
-      const response = await fetch(`https://${projectId}.supabase.co/functions/v1/make-server-c6c9ad1a/workout-plan`, {
+      const response = await fetch(`https://${projectId}.supabase.co/functions/v1/make-server-c6c9ad1a/manual-workout-plan`, {
         headers: {
           'Authorization': `Bearer ${session.access_token}`
         }

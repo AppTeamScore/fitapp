@@ -58,7 +58,7 @@ export function WorkoutPlanPage({ onNavigate, onStartWorkout }: WorkoutPlanPageP
         return;
       }
 
-      const response = await fetch(`https://${projectId}.supabase.co/functions/v1/make-server-c6c9ad1a/workout-plan`, {
+      const response = await fetch(`https://${projectId}.supabase.co/functions/v1/make-server-c6c9ad1a/manual-workout-plan`, {
         headers: {
           'Authorization': `Bearer ${session.access_token}`
         }
@@ -128,6 +128,21 @@ export function WorkoutPlanPage({ onNavigate, onStartWorkout }: WorkoutPlanPageP
           createdAt: new Date().toISOString()
         };
         setPlanData(newPlanData);
+
+        // Сохраняем сгенерированный план как ручной
+        const saveResponse = await fetch(`https://${projectId}.supabase.co/functions/v1/make-server-c6c9ad1a/manual-workout-plan`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${session.access_token}`
+          },
+          body: JSON.stringify({ plan: newPlanData.plan })
+        });
+
+        if (!saveResponse.ok) {
+          console.error('Ошибка сохранения сгенерированного плана');
+        }
+
         toast.success('Новый план тренировок сгенерирован');
       } else {
         toast.error(`Ошибка генерации плана: ${result.error}`);
@@ -182,7 +197,7 @@ export function WorkoutPlanPage({ onNavigate, onStartWorkout }: WorkoutPlanPageP
         return;
       }
 
-      const response = await fetch(`https://${projectId}.supabase.co/functions/v1/make-server-c6c9ad1a/workout-plan`, {
+      const response = await fetch(`https://${projectId}.supabase.co/functions/v1/make-server-c6c9ad1a/manual-workout-plan`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${session.access_token}`

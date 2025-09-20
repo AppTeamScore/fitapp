@@ -115,7 +115,7 @@ export function VideoPlayer({
           
           <video
             ref={videoRef}
-            className="w-full aspect-[9/16] object-cover"
+            className="w-full object-contain max-h-[60vh]"
             loop={loop}
             muted={isMuted}
             playsInline
