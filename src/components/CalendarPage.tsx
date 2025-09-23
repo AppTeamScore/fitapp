@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { ChevronLeft, ChevronRight, CheckCircle2, Plus } from "lucide-react";  
+import { ChevronLeft, ChevronRight, CheckCircle2, Plus } from "lucide-react";
 import { Button } from "./ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Badge } from "./ui/badge";
@@ -8,21 +8,26 @@ interface CalendarPageProps {
   onNavigate: (page: string) => void;
 }
 
+interface Workout {
+  type: string;
+  completed: boolean;
+}
+
 export function CalendarPage({ onNavigate }: CalendarPageProps) {
   const [currentDate, setCurrentDate] = useState(new Date());
-  const [workoutData, setWorkoutData] = useState<Record<string, {type: string, completed: boolean}>>({});
-  
+  const [workoutData, setWorkoutData] = useState<Record<string, Workout>>({});
+
   useEffect(() => {
     loadWorkoutData();
-  }, []);
+  }, [currentDate]);
 
   const loadWorkoutData = () => {
     // Загружаем данные из localStorage
     const completedWorkouts = JSON.parse(localStorage.getItem('completedWorkouts') || '[]');
     const plannedWorkouts = JSON.parse(localStorage.getItem('plannedWorkouts') || '[]');
-    
-    const allWorkouts: Record<string, {type: string, completed: boolean}> = {};
-    
+
+    const allWorkouts: Record<string, Workout> = {};
+
     // Добавляем завершенные тренировки
     completedWorkouts.forEach((workout: any) => {
       const dateKey = workout.date.split('T')[0]; // Берем только дату без времени
@@ -31,7 +36,7 @@ export function CalendarPage({ onNavigate }: CalendarPageProps) {
         completed: true
       };
     });
-    
+
     // Добавляем запланированные тренировки
     plannedWorkouts.forEach((workout: any) => {
       const dateKey = workout.date.split('T')[0];
@@ -45,26 +50,11 @@ export function CalendarPage({ onNavigate }: CalendarPageProps) {
 
     // Добавляем примеры данных для демонстрации (текущий месяц)
     const today = new Date();
-    const currentMonth = today.getMonth();
-    const currentYear = today.getFullYear();
-    
-    // Добавляем несколько примеров тренировок для текущего месяца
-    const sampleWorkouts = [
-      { day: 1, type: 'Кардио', completed: true },
-      { day: 3, type: 'Силовая', completed: true },
-      { day: 5, type: 'HIIT', completed: false },
-      { day: 8, type: 'Йога', completed: true },
-      { day: 10, type: 'Кардио', completed: true },
-      { day: 12, type: 'Силовая', completed: false },
-      { day: 15, type: 'HIIT', completed: true },
-    ];
+    const currentMonth = currentDate.getMonth();
+    const currentYear = currentDate.getFullYear();
 
-    sampleWorkouts.forEach(({ day, type, completed }) => {
-      const dateKey = `${currentYear}-${(currentMonth + 1).toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
-      if (!allWorkouts[dateKey]) {
-        allWorkouts[dateKey] = { type, completed };
-      }
-    });
+    // Примеры тренировок удалены
+
 
     setWorkoutData(allWorkouts);
   };
@@ -85,17 +75,23 @@ export function CalendarPage({ onNavigate }: CalendarPageProps) {
     const startingDayOfWeek = (firstDay.getDay() + 6) % 7; // Понедельник = 0
 
     const days = [];
-    
+
     // Пустые дни в начале месяца
     for (let i = 0; i < startingDayOfWeek; i++) {
       days.push(null);
     }
-    
+
     // Дни месяца
     for (let day = 1; day <= daysInMonth; day++) {
       days.push(day);
     }
-    
+
+    // Пустые дни в конце месяца
+    const totalCells = 7 * Math.ceil((daysInMonth + startingDayOfWeek) / 7);
+    for (let i = days.length; i < totalCells; i++) {
+      days.push(null);
+    }
+
     return days;
   };
 
@@ -135,12 +131,12 @@ export function CalendarPage({ onNavigate }: CalendarPageProps) {
       type: 'Тренировка',
       completed: false
     };
-    
+
     // Добавляем в plannedWorkouts в localStorage
     const plannedWorkouts = JSON.parse(localStorage.getItem('plannedWorkouts') || '[]');
     plannedWorkouts.push(newWorkout);
     localStorage.setItem('plannedWorkouts', JSON.stringify(plannedWorkouts));
-    
+
     // Обновляем локальное состояние
     setWorkoutData(prev => ({
       ...prev,
@@ -148,10 +144,32 @@ export function CalendarPage({ onNavigate }: CalendarPageProps) {
     }));
   };
 
+  const removeWorkout = (day: number) => {
+    const dateKey = getDateKey(day);
+
+    // Удаляем из plannedWorkouts в localStorage
+    const plannedWorkouts = JSON.parse(localStorage.getItem('plannedWorkouts') || '[]');
+    const updatedPlannedWorkouts = plannedWorkouts.filter((workout: any) => workout.date !== dateKey);
+    localStorage.setItem('plannedWorkouts', JSON.stringify(updatedPlannedWorkouts));
+
+    // Удаляем из completedWorkouts в localStorage
+    const completedWorkouts = JSON.parse(localStorage.getItem('completedWorkouts') || '[]');
+    const updatedCompletedWorkouts = completedWorkouts.filter((workout: any) => workout.date.split('T')[0] !== dateKey);
+    localStorage.setItem('completedWorkouts', JSON.stringify(updatedCompletedWorkouts));
+
+    // Обновляем локальное состояние
+    setWorkoutData(prev => {
+      const newData = { ...prev };
+      delete newData[dateKey];
+      return newData;
+    });
+
+  };
+
   const markCompleted = (day: number) => {
     const dateKey = getDateKey(day);
     const workout = workoutData[dateKey];
-    
+
     if (workout && !workout.completed) {
       // Добавляем в completedWorkouts
       const completedWorkouts = JSON.parse(localStorage.getItem('completedWorkouts') || '[]');
@@ -161,7 +179,7 @@ export function CalendarPage({ onNavigate }: CalendarPageProps) {
         duration: 45 // Предполагаемая продолжительность
       });
       localStorage.setItem('completedWorkouts', JSON.stringify(completedWorkouts));
-      
+
       // Обновляем локальное состояние
       setWorkoutData(prev => ({
         ...prev,
@@ -171,7 +189,7 @@ export function CalendarPage({ onNavigate }: CalendarPageProps) {
   };
 
   const days = getDaysInMonth(currentDate);
-  const completedWorkouts = Object.values(workoutData).filter(w => w.completed).length;
+  const completedWorkouts = Object.values(workoutData).filter((w: Workout) => w.completed).length;
   const totalWorkouts = Object.keys(workoutData).length;
 
   return (
@@ -231,18 +249,18 @@ export function CalendarPage({ onNavigate }: CalendarPageProps) {
               </div>
             ))}
           </div>
-          
+
           {/* Дни месяца */}
           <div className="grid grid-cols-7 gap-1">
             {days.map((day, index) => {
               if (!day) {
                 return <div key={index} className="p-2" />;
               }
-              
+
               const dateKey = getDateKey(day);
               const workout = workoutData[dateKey];
               const isToday = new Date().toDateString() === new Date(currentDate.getFullYear(), currentDate.getMonth(), day).toDateString();
-              
+
               return (
                 <div key={day} className="relative">
                   <div className={`
@@ -252,7 +270,7 @@ export function CalendarPage({ onNavigate }: CalendarPageProps) {
                     <div className="font-medium">{day}</div>
                     {workout ? (
                       <div className="mt-1 space-y-1">
-                        <Badge 
+                        <Badge
                           className={`text-xs ${getWorkoutTypeColor(workout.type)}`}
                         >
                           {workout.type}
@@ -260,17 +278,30 @@ export function CalendarPage({ onNavigate }: CalendarPageProps) {
                         {workout.completed ? (
                           <CheckCircle2 className="h-3 w-3 text-green-600 mx-auto" />
                         ) : (
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            className="h-4 w-4 p-0 text-xs"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              markCompleted(day);
-                            }}
-                          >
-                            ✓
-                          </Button>
+                          <div className="flex justify-center gap-1">
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="h-4 w-4 p-0 text-xs"
+                              onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
+                                e.stopPropagation();
+                                markCompleted(day);
+                              }}
+                            >
+                              ✓
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="h-4 w-4 p-0 text-xs text-red-500"
+                              onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
+                                e.stopPropagation();
+                                removeWorkout(day);
+                              }}
+                            >
+                              ✗
+                            </Button>
+                          </div>
                         )}
                       </div>
                     ) : (
@@ -278,7 +309,7 @@ export function CalendarPage({ onNavigate }: CalendarPageProps) {
                         size="sm"
                         variant="ghost"
                         className="h-4 w-4 p-0 mt-1 opacity-50 hover:opacity-100"
-                        onClick={(e) => {
+                        onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
                           e.stopPropagation();
                           addWorkout(day);
                         }}

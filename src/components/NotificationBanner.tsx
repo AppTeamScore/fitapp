@@ -1,5 +1,16 @@
 import { useState, useEffect } from 'react';
-import { X, Trophy, Target, Flame, Calendar } from 'lucide-react';
+import { X, Trophy, Target, Flame, 
+  Calendar, 
+  Apple, 
+  Brain, 
+  Moon, 
+  Droplet, 
+  TrendingUp, 
+  Shield, 
+  Users, 
+  Activity, 
+  Sunrise 
+} from 'lucide-react';
 import { Button } from './ui/button';
 import { Card, CardContent } from './ui/card';
 import { Badge } from './ui/badge';
@@ -102,6 +113,66 @@ export function NotificationBanner({ className = '' }: NotificationBannerProps) 
         message: 'Планирование тренировок повышает вероятность их выполнения на 80%.',
         icon: <Calendar className="w-5 h-5" />,
         color: 'from-indigo-500 to-blue-500'
+      },
+      {
+        title: 'Факт о питании',
+        message: 'Белковый завтрак помогает контролировать аппетит в течение всего дня.',
+        icon: <Apple className="w-5 h-5" />,
+        color: 'from-green-500 to-emerald-500'
+      },
+      {
+        title: 'Психология',
+        message: 'Визуализация успеха увеличивает шансы на достижение цели на 30%.',
+        icon: <Brain className="w-5 h-5" />,
+        color: 'from-purple-500 to-pink-500'
+      },
+      {
+        title: 'Сон и восстановление',
+        message: 'Качество сна напрямую влияет на эффективность тренировок и прогресс.',
+        icon: <Moon className="w-5 h-5" />,
+        color: 'from-blue-500 to-cyan-500'
+      },
+      {
+        title: 'Гидротация',
+        message: 'Даже легкое обезвоживание снижает физическую производительность на 10-20%.',
+        icon: <Droplet className="w-5 h-5" />,
+        color: 'from-cyan-500 to-blue-500'
+      },
+      {
+        title: 'Прогресс',
+        message: 'Маленькие, но постоянные улучшения приводят к значительным результатам.',
+        icon: <TrendingUp className="w-5 h-5" />,
+        color: 'from-teal-500 to-green-500'
+      },
+      {
+        title: 'Мотивация',
+        message: 'Начинайте с самых простых задач - это создает импульс для больших свершений.',
+        icon: <Target className="w-5 h-5" />,
+        color: 'from-rose-500 to-orange-500'
+      },
+      {
+        title: 'Вредные привычки',
+        message: 'Замена одной вредной привычки на полезную меняет жизнь к лучшему.',
+        icon: <Shield className="w-5 h-5" />,
+        color: 'from-gray-500 to-slate-600'
+      },
+      {
+        title: 'Социальная поддержка',
+        message: 'Тренировки с партнером увеличивают adherence на 50%.',
+        icon: <Users className="w-5 h-5" />,
+        color: 'from-violet-500 to-purple-500'
+      },
+      {
+        title: 'Техника выполнения',
+        message: 'Правильная форма важнее большого веса - это предотвращает травмы.',
+        icon: <Activity className="w-5 h-5" />,
+        color: 'from-amber-500 to-yellow-500'
+      },
+      {
+        title: 'Время тренировок',
+        message: 'Утренние тренировки помогают установить режим и повысить продуктивность дня.',
+        icon: <Sunrise className="w-5 h-5" />,
+        color: 'from-yellow-500 to-orange-500'
       }
     ];
 

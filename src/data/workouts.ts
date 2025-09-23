@@ -194,13 +194,13 @@ export const workouts: Workout[] = [
         hasWeight: true
       },
       {
-        id: "video_035",
-        name: "Молотковые сгибания",
-        video: "video_034.mp4",
+        id: "video_002",
+        name: "Чередующий молотковый подъем гантелей",
+        video: "video_002.mp4",
         duration: 35,
         rest: 20,
         category: "Сила",
-        difficulty: "Легко",
+        difficulty: "Средне",
         muscleGroups: ["Бицепс", "Предплечья"],
         hasWeight: true
       },

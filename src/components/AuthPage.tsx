@@ -115,7 +115,7 @@ export function AuthPage({ onAuthSuccess }: AuthPageProps) {
     <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-primary/10 via-background to-secondary/10">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl">FitApp</CardTitle>
+          <CardTitle className="text-2xl">Твой Фитнес AI</CardTitle>
           <CardDescription>
             Ваш персональный тренер в кармане
           </CardDescription>
