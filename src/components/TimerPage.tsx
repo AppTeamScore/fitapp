@@ -220,6 +220,7 @@ export function TimerPage({ onNavigate, workout }: TimerPageProps) {
           {!isResting && currentExercise?.video && (
             <div className="mb-4">
               <VideoPlayer
+                key={currentExercise.video} // Добавляем ключ для принудительного обновления
                 videoSrc={currentExercise.video}
                 exerciseName={currentExercise.name}
                 autoPlay={isRunning}

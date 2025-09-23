@@ -147,11 +147,11 @@ export function WorkoutPlanPage({ onNavigate, onStartWorkout }: WorkoutPlanPageP
   const handleStartWorkout = (dayWorkout: any) => {
     // Находим упражнения из нашей базы данных
     const workoutExercises = dayWorkout.exercises.map((planExercise: any) => {
-      const foundExercise = exercises.find(ex => 
+      const foundExercise = exercises.find(ex =>
         ex.name.toLowerCase().includes(planExercise.name.toLowerCase()) ||
         planExercise.name.toLowerCase().includes(ex.name.toLowerCase())
       );
-      
+
       return {
         ...foundExercise,
         sets: planExercise.sets,
@@ -167,7 +167,8 @@ export function WorkoutPlanPage({ onNavigate, onStartWorkout }: WorkoutPlanPageP
       name: dayWorkout.workoutName,
       duration: dayWorkout.totalDuration,
       exercises: workoutExercises,
-      difficulty: 'medium'
+      difficulty: 'medium',
+      exercises_list: workoutExercises // Добавляем exercises_list для совместимости с TimerPage
     };
 
     onStartWorkout(workout);

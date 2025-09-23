@@ -196,7 +196,7 @@ export const workouts: Workout[] = [
       {
         id: "video_035",
         name: "Молотковые сгибания",
-        video: "video_035.mp4",
+        video: "video_034.mp4",
         duration: 35,
         rest: 20,
         category: "Сила",
