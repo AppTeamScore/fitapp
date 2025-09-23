@@ -68,6 +68,7 @@ export function StatsPage({ onNavigate }: StatsPageProps) {
         processStatsData(result.progressRecords || []);
       } else {
         console.error('Ошибка загрузки статистики');
+        toast.error('Ошибка загрузки статистики');
         setStats({
           totalWorkouts: 0,
           totalMinutes: 0,
@@ -203,7 +204,7 @@ export function StatsPage({ onNavigate }: StatsPageProps) {
   };
 
   const getChartData = () => {
-    if (!stats?.progressRecords.length) return [];
+    if (!stats?.progressRecords || !stats.progressRecords.length) return [];
 
     const now = new Date();
     const daysToShow = selectedPeriod === 'week' ? 7 : selectedPeriod === 'month' ? 30 : 365;
@@ -212,14 +213,14 @@ export function StatsPage({ onNavigate }: StatsPageProps) {
     for (let i = daysToShow - 1; i >= 0; i--) {
       const date = new Date(now.getTime() - i * 24 * 60 * 60 * 1000);
       const dateStr = date.toISOString().split('T')[0];
-      
+
       const dayWorkouts = stats.progressRecords.filter(record => {
         const recordDate = new Date(record.completedAt).toISOString().split('T')[0];
         return recordDate === dateStr;
       });
 
       data.push({
-        date: selectedPeriod === 'week' 
+        date: selectedPeriod === 'week'
           ? ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'][date.getDay()]
           : date.getDate().toString(),
         workouts: dayWorkouts.length,
