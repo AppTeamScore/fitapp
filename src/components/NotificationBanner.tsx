@@ -1,16 +1,5 @@
 import { useState, useEffect } from 'react';
-import { X, Trophy, Target, Flame, 
-  Calendar, 
-  Apple, 
-  Brain, 
-  Moon, 
-  Droplet, 
-  TrendingUp, 
-  Shield, 
-  Users, 
-  Activity, 
-  Sunrise 
-} from 'lucide-react';
+import { X, Trophy, Target, Flame, Calendar, Heart, Dumbbell, Apple, Clock, Sun, Moon, Star, Shield, Leaf, Brain, Music } from 'lucide-react';
 import { Button } from './ui/button';
 import { Card, CardContent } from './ui/card';
 import { Badge } from './ui/badge';
@@ -115,79 +104,113 @@ export function NotificationBanner({ className = '' }: NotificationBannerProps) 
         color: 'from-indigo-500 to-blue-500'
       },
       {
-        title: 'Факт о питании',
-        message: 'Белковый завтрак помогает контролировать аппетит в течение всего дня.',
-        icon: <Apple className="w-5 h-5" />,
-        color: 'from-green-500 to-emerald-500'
+        title: 'Совет дня',
+        message: 'Маленькие шаги ведут к большим изменениям. Каждый день делайте что-то, что приближает вас к вашей цели.',
+        icon: <Flame className="w-5 h-5" />,
+        color: 'from-orange-500 to-red-500'
       },
       {
-        title: 'Психология',
-        message: 'Визуализация успеха увеличивает шансы на достижение цели на 30%.',
-        icon: <Brain className="w-5 h-5" />,
-        color: 'from-purple-500 to-pink-500'
+        title: 'Знаете ли вы?',
+        message: 'Спорт улучшает настроение и снижает уровень стресса. Регулярные тренировки могут снизить уровень кортизола на 20%.',
+        icon: <Calendar className="w-5 h-5" />,
+        color: 'from-indigo-500 to-blue-500'
       },
       {
-        title: 'Сон и восстановление',
-        message: 'Качество сна напрямую влияет на эффективность тренировок и прогресс.',
-        icon: <Moon className="w-5 h-5" />,
-        color: 'from-blue-500 to-cyan-500'
+        title: 'Совет дня',
+        message: 'Не сравнивайте себя с другими. Каждый человек имеет свой собственный темп и путь.',
+        icon: <Flame className="w-5 h-5" />,
+        color: 'from-orange-500 to-red-500'
       },
       {
-        title: 'Гидротация',
-        message: 'Даже легкое обезвоживание снижает физическую производительность на 10-20%.',
-        icon: <Droplet className="w-5 h-5" />,
-        color: 'from-cyan-500 to-blue-500'
+        title: 'Знаете ли вы?',
+        message: 'Спорт улучшает качество сна. Регулярные тренировки могут помочь вам заснуть быстрее и спать глубже.',
+        icon: <Calendar className="w-5 h-5" />,
+        color: 'from-indigo-500 to-blue-500'
       },
       {
-        title: 'Прогресс',
-        message: 'Маленькие, но постоянные улучшения приводят к значительным результатам.',
-        icon: <TrendingUp className="w-5 h-5" />,
-        color: 'from-teal-500 to-green-500'
+        title: 'Совет дня',
+        message: 'Вода - это жизнь. Пейте достаточно воды каждый день, чтобы поддерживать свою энергию.',
+        icon: <Flame className="w-5 h-5" />,
+        color: 'from-orange-500 to-red-500'
       },
       {
-        title: 'Мотивация',
-        message: 'Начинайте с самых простых задач - это создает импульс для больших свершений.',
-        icon: <Target className="w-5 h-5" />,
-        color: 'from-rose-500 to-orange-500'
+        title: 'Знаете ли вы?',
+        message: 'Спорт улучшает иммунитет. Регулярные тренировки могут снизить риск заражения на 30%.',
+        icon: <Calendar className="w-5 h-5" />,
+        color: 'from-indigo-500 to-blue-500'
       },
       {
-        title: 'Вредные привычки',
-        message: 'Замена одной вредной привычки на полезную меняет жизнь к лучшему.',
-        icon: <Shield className="w-5 h-5" />,
-        color: 'from-gray-500 to-slate-600'
+        title: 'Совет дня',
+        message: 'Не забывайте о растяжке. Она помогает предотвратить травмы и улучшает гибкость.',
+        icon: <Flame className="w-5 h-5" />,
+        color: 'from-orange-500 to-red-500'
       },
       {
-        title: 'Социальная поддержка',
-        message: 'Тренировки с партнером увеличивают adherence на 50%.',
-        icon: <Users className="w-5 h-5" />,
-        color: 'from-violet-500 to-purple-500'
+        title: 'Знаете ли вы?',
+        message: 'Спорт улучшает концентрацию. Регулярные тренировки могут повысить уровень тестостерона на 15%.',
+        icon: <Calendar className="w-5 h-5" />,
+        color: 'from-indigo-500 to-blue-500'
       },
       {
-        title: 'Техника выполнения',
-        message: 'Правильная форма важнее большого веса - это предотвращает травмы.',
-        icon: <Activity className="w-5 h-5" />,
-        color: 'from-amber-500 to-yellow-500'
+        title: 'Совет дня',
+        message: 'Не пропускайте тренировки. Даже одна тренировка в неделю может сделать разницу.',
+        icon: <Flame className="w-5 h-5" />,
+        color: 'from-orange-500 to-red-500'
       },
       {
-        title: 'Время тренировок',
-        message: 'Утренние тренировки помогают установить режим и повысить продуктивность дня.',
-        icon: <Sunrise className="w-5 h-5" />,
-        color: 'from-yellow-500 to-orange-500'
+        title: 'Знаете ли вы?',
+        message: 'Спорт улучшает память. Регулярные тренировки могут повысить уровень окситоцина на 20%.',
+        icon: <Calendar className="w-5 h-5" />,
+        color: 'from-indigo-500 to-blue-500'
+      },
+      {
+        title: 'Совет дня',
+        message: 'Не забывайте о питании. Правильное питание помогает достичь лучших результатов.',
+        icon: <Flame className="w-5 h-5" />,
+        color: 'from-orange-500 to-red-500'
+      },
+      {
+        title: 'Знаете ли вы?',
+        message: 'Спорт улучшает самооценку. Регулярные тренировки могут повысить уровень эндорфинов на 30%.',
+        icon: <Calendar className="w-5 h-5" />,
+        color: 'from-indigo-500 to-blue-500'
+      },
+      {
+        title: 'Совет дня',
+        message: 'Не забывайте о отдыхе. Отдых так же важен, как и тренировки.',
+        icon: <Flame className="w-5 h-5" />,
+        color: 'from-orange-500 to-red-500'
+      },
+      {
+        title: 'Знаете ли вы?',
+        message: 'Спорт улучшает здоровье сердца. Регулярные тренировки могут снизить риск сердечно-сосудистых заболеваний на 20%.',
+        icon: <Calendar className="w-5 h-5" />,
+        color: 'from-indigo-500 to-blue-500'
+      },
+      {
+        title: 'Совет дня',
+        message: 'Не забывайте о мотивации. Мотивация - это ключ к успеху.',
+        icon: <Flame className="w-5 h-5" />,
+        color: 'from-orange-500 to-red-500'
+      },
+      {
+        title: 'Знаете ли вы?',
+        message: 'Спорт улучшает здоровье костей. Регулярные тренировки могут повысить плотность костей на 10%.',
+        icon: <Calendar className="w-5 h-5" />,
+        color: 'from-indigo-500 to-blue-500'
       }
     ];
 
-    if (Math.random() > 0.5) {
-      const tip = tips[Math.floor(Math.random() * tips.length)];
-      newNotifications.push({
-        id: 'tip-' + Date.now(),
-        type: 'tip',
-        title: tip.title,
-        message: tip.message,
-        icon: tip.icon,
-        color: tip.color,
-        dismissible: true
-      });
-    }
+    const tip = tips[Math.floor(Math.random() * tips.length)];
+    newNotifications.push({
+      id: 'tip-' + Date.now(),
+      type: 'tip',
+      title: tip.title,
+      message: tip.message,
+      icon: tip.icon,
+      color: tip.color,
+      dismissible: true
+    });
 
     setNotifications(newNotifications);
   };
