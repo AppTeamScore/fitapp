@@ -93,7 +93,7 @@ export function HomePage({ onNavigate, user, onLogout }: HomePageProps) {
         <div className="p-4 space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-bold">FitApp</h1>
+              <h1 className="text-2xl font-bold">Твой фитнес AI</h1>
               <p className="text-primary-foreground/90">
                 Привет, {user?.user_metadata?.name || 'Пользователь'}!
               </p>
