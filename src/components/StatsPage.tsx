@@ -49,6 +49,30 @@ export function StatsPage({ onNavigate }: StatsPageProps) {
     loadStats();
   }, []);
 
+  // Добавляем обработчик события очистки статистики
+  useEffect(() => {
+    const handleStatsCleared = () => {
+      logger.info('Получено уведомление об очистке статистики');
+      setStats({
+        totalWorkouts: 0,
+        totalMinutes: 0,
+        averageDuration: 0,
+        thisWeekCount: 0,
+        thisMonthCount: 0,
+        streak: 0,
+        favoriteCategory: 'Нет данных',
+        progressRecords: []
+      });
+    };
+
+    eventBus.on('stats:cleared', handleStatsCleared);
+    
+    return () => {
+      eventBus.off('stats:cleared', handleStatsCleared);
+    };
+  }, []);
+
+
   const loadStats = async () => {
     logger.startFunction('loadStats');
     try {
@@ -465,21 +489,28 @@ export function StatsPage({ onNavigate }: StatsPageProps) {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="h-48">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={getChartData()}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="date" />
-                    <YAxis />
-                    <Tooltip 
-                      formatter={(value, name) => [
-                        value, 
-                        name === 'workouts' ? 'Тренировок' : 'Минут'
-                      ]}
-                    />
-                    <Bar dataKey="workouts" fill="#030213" />
-                  </BarChart>
-                </ResponsiveContainer>
+              <div className="h-48 flex items-center justify-center">
+                {stats?.progressRecords && stats.progressRecords.length > 0 ? (
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={getChartData()}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="date" />
+                      <YAxis />
+                      <Tooltip
+                        formatter={(value, name) => [
+                          value,
+                          name === 'workouts' ? 'Тренировок' : 'Минут'
+                        ]}
+                      />
+                      <Bar dataKey="workouts" fill="#030213" />
+                    </BarChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <div className="text-center">
+                    <Activity className="w-12 h-12 text-muted-foreground mx-auto mb-2" />
+                    <p className="text-muted-foreground">Добавьте тренировки, чтобы увидеть график активности</p>
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
@@ -493,24 +524,31 @@ export function StatsPage({ onNavigate }: StatsPageProps) {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="h-48">
-                <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={getChartData()}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="date" />
-                    <YAxis />
-                    <Tooltip 
-                      formatter={(value) => [value, 'Минут']}
-                    />
-                    <Area 
-                      type="monotone" 
-                      dataKey="minutes" 
-                      stroke="#030213" 
-                      fill="#030213" 
-                      fillOpacity={0.1}
-                    />
-                  </AreaChart>
-                </ResponsiveContainer>
+              <div className="h-48 flex items-center justify-center">
+                {stats?.progressRecords && stats.progressRecords.length > 0 ? (
+                  <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart data={getChartData()}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="date" />
+                      <YAxis />
+                      <Tooltip
+                        formatter={(value) => [value, 'Минут']}
+                      />
+                      <Area
+                        type="monotone"
+                        dataKey="minutes"
+                        stroke="#030213"
+                        fill="#030213"
+                        fillOpacity={0.1}
+                      />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <div className="text-center">
+                    <Clock className="w-12 h-12 text-muted-foreground mx-auto mb-2" />
+                    <p className="text-muted-foreground">Добавьте тренировки, чтобы увидеть график времени</p>
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
@@ -526,24 +564,31 @@ export function StatsPage({ onNavigate }: StatsPageProps) {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="h-48">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={getCategoryData()}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={40}
-                  outerRadius={80}
-                  dataKey="value"
-                >
-                  {getCategoryData().map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip formatter={(value) => [`${value}%`, 'Доля']} />
-              </PieChart>
-            </ResponsiveContainer>
+          <div className="h-48 flex items-center justify-center">
+            {stats?.progressRecords && stats.progressRecords.length > 0 ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={getCategoryData()}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={40}
+                    outerRadius={80}
+                    dataKey="value"
+                  >
+                    {getCategoryData().map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip formatter={(value) => [`${value}%`, 'Доля']} />
+                </PieChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="text-center">
+                <Award className="w-12 h-12 text-muted-foreground mx-auto mb-2" />
+                <p className="text-muted-foreground">Добавьте тренировки, чтобы увидеть распределение по типам</p>
+              </div>
+            )}
           </div>
           <div className="grid grid-cols-2 gap-2 mt-4">
             {getCategoryData().map((item, index) => (

@@ -42,6 +42,9 @@ export function AuthPage({ onAuthSuccess }: AuthPageProps) {
 
       if (data.session?.access_token) {
         toast.success('Успешный вход!');
+        // Очищаем localStorage при входе нового пользователя
+        localStorage.removeItem('completedWorkouts');
+        localStorage.removeItem('plannedWorkouts');
         onAuthSuccess(data.user);
       }
     } catch (error) {
@@ -92,6 +95,10 @@ export function AuthPage({ onAuthSuccess }: AuthPageProps) {
       }
 
       toast.success('Регистрация успешна! Теперь войдите в систему');
+      
+      // Очищаем localStorage при регистрации нового пользователя
+      localStorage.removeItem('completedWorkouts');
+      localStorage.removeItem('plannedWorkouts');
       
       // Автоматически переключаемся на вкладку входа
       setLoginData({

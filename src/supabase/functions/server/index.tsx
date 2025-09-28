@@ -353,24 +353,29 @@ app.delete('/make-server-c6c9ad1a/workout-progress', async (c) => {
       return c.json({ error: 'Неавторизован' }, 401)
     }
 
-    // Получаем все записи прогресса пользователя
-    const progressRecords = await kv.getByPrefix(`progress:${user.id}:`)
+    // Получаем все ключи прогресса пользователя напрямую из базы данных
+    const { data: keysData, error: keysError } = await supabase
+      .from('kv_store_c6c9ad1a')
+      .select('key')
+      .like('key', `progress:${user.id}:%`)
     
-    // Удаляем все записи прогресса
+    if (keysError) {
+      console.log(`Ошибка получения ключей: ${keysError}`)
+      return c.json({ error: 'Внутренняя ошибка сервера' }, 500)
+    }
+
+    // Удаляем все записи прогресса пользователя
     const deletePromises = []
-    for (const record of progressRecords) {
-      // Извлекаем timestamp из completedAt для формирования ключа
-      const timestamp = new Date(record.completedAt).getTime()
-      const key = `progress:${user.id}:${timestamp}`
-      deletePromises.push(kv.del(key))
+    for (const record of keysData || []) {
+      deletePromises.push(kv.del(record.key))
     }
     
     await Promise.all(deletePromises)
     
-    return c.json({ 
-      success: true, 
+    return c.json({
+      success: true,
       message: 'Статистика тренировок очищена',
-      deletedRecords: progressRecords.length
+      deletedRecords: keysData?.length || 0
     })
   } catch (error) {
     console.log(`Ошибка очистки статистики: ${error}`)

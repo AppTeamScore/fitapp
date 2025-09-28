@@ -85,6 +85,9 @@ export default function App() {
     logger.startFunction('handleAuthSuccess', { userId: authUser.id });
     logger.logUserAction('Успешная авторизация', { userId: authUser.id });
     setUser(authUser);
+    // Очищаем localStorage при успешной авторизации нового пользователя
+    localStorage.removeItem('completedWorkouts');
+    localStorage.removeItem('plannedWorkouts');
     // Получаем актуальную сессию для токена
     const { data: { session } } = await supabase.auth.getSession();
     if (session?.access_token) {
@@ -123,6 +126,9 @@ export default function App() {
     await supabase.auth.signOut();
     setUser(null);
     setNeedsOnboarding(false);
+    // Очищаем localStorage при выходе из аккаунта
+    localStorage.removeItem('completedWorkouts');
+    localStorage.removeItem('plannedWorkouts');
     setCurrentPage('auth');
     logger.endFunction('handleLogout');
   };
