@@ -59,4 +59,8 @@
       port: 3000,
       open: true,
     },
+    // Включаем логирование в режиме разработки
+    define: {
+      'import.meta.env.MODE': JSON.stringify(process.env.MODE || 'development'),
+    },
   });

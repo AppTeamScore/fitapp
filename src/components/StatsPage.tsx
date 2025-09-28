@@ -10,6 +10,8 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 import { toast } from 'sonner@2.0.3';
 import { supabase } from '../utils/supabase/client';
 import { projectId } from '../utils/supabase/info';
+import { logger } from '../utils/logger';
+import { eventBus } from '../utils/events';
 
 interface StatsPageProps {
   onNavigate: (page: string) => void;
@@ -48,14 +50,19 @@ export function StatsPage({ onNavigate }: StatsPageProps) {
   }, []);
 
   const loadStats = async () => {
+    logger.startFunction('loadStats');
     try {
       const { data: { session } } = await supabase.auth.getSession();
       
       if (!session?.access_token) {
+        logger.warn('Попытка загрузки статистики без авторизации');
         toast.error('Необходима авторизация');
         onNavigate('auth');
         return;
       }
+
+      logger.logApiRequest('workout-progress', 'GET', null, { Authorization: `Bearer ${session.access_token}` });
+      const startTime = Date.now();
 
       const response = await fetch(`https://${projectId}.supabase.co/functions/v1/make-server-c6c9ad1a/workout-progress`, {
         headers: {
@@ -63,11 +70,16 @@ export function StatsPage({ onNavigate }: StatsPageProps) {
         }
       });
 
+      const duration = Date.now() - startTime;
+      logger.logApiResponse('workout-progress', 'GET', response.status, null, duration);
+
       if (response.ok) {
         const result = await response.json();
+        logger.info('Статистика успешно загружена', { recordCount: result.progressRecords?.length || 0 });
         processStatsData(result.progressRecords || []);
       } else {
-        console.error('Ошибка загрузки статистики');
+        const errorData = await response.json();
+        logger.error('Ошибка загрузки статистики', new Error(errorData.error || 'Unknown error'), { status: response.status });
         toast.error('Ошибка загрузки статистики');
         setStats({
           totalWorkouts: 0,
@@ -81,15 +93,19 @@ export function StatsPage({ onNavigate }: StatsPageProps) {
         });
       }
     } catch (error) {
-      console.error('Ошибка загрузки статистики:', error);
+      logger.error('Ошибка загрузки статистики', error as Error);
       toast.error('Ошибка загрузки статистики');
     } finally {
       setIsLoading(false);
+      logger.endFunction('loadStats');
     }
   };
 
   const processStatsData = (progressRecords: WorkoutProgress[]) => {
+    logger.startFunction('processStatsData', { recordCount: progressRecords?.length || 0 });
+    
     if (!progressRecords || progressRecords.length === 0) {
+      logger.info('Нет данных о тренировках');
       setStats({
         totalWorkouts: 0,
         totalMinutes: 0,
@@ -100,11 +116,12 @@ export function StatsPage({ onNavigate }: StatsPageProps) {
         favoriteCategory: 'Нет данных',
         progressRecords: []
       });
+      logger.endFunction('processStatsData');
       return;
     }
 
     // Сортируем по дате
-    const sortedRecords = progressRecords.sort((a, b) => 
+    const sortedRecords = progressRecords.sort((a, b) =>
       new Date(b.completedAt).getTime() - new Date(a.completedAt).getTime()
     );
 
@@ -118,11 +135,11 @@ export function StatsPage({ onNavigate }: StatsPageProps) {
     const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
     const monthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
 
-    const thisWeekCount = sortedRecords.filter(record => 
+    const thisWeekCount = sortedRecords.filter(record =>
       new Date(record.completedAt) >= weekAgo
     ).length;
 
-    const thisMonthCount = sortedRecords.filter(record => 
+    const thisMonthCount = sortedRecords.filter(record =>
       new Date(record.completedAt) >= monthAgo
     ).length;
 
@@ -144,8 +161,41 @@ export function StatsPage({ onNavigate }: StatsPageProps) {
       }
     }
 
-    // Любимая категория (заглушка, так как у нас нет информации о категориях в прогрессе)
-    const favoriteCategory = 'Силовые тренировки';
+    // Анализ категорий на основе реальных данных
+    const categoryCount: Record<string, number> = {};
+    sortedRecords.forEach(record => {
+      // Извлекаем тип тренировки из названия или используем общий тип
+      let category = 'Тренировка';
+      if (record.workoutName.toLowerCase().includes('кардио')) {
+        category = 'Кардио';
+      } else if (record.workoutName.toLowerCase().includes('сил') || record.workoutName.toLowerCase().includes('сила')) {
+        category = 'Силовые';
+      } else if (record.workoutName.toLowerCase().includes('йога')) {
+        category = 'Йога';
+      } else if (record.workoutName.toLowerCase().includes('растяж') || record.workoutName.toLowerCase().includes('стретч')) {
+        category = 'Растяжка';
+      } else if (record.workoutName.toLowerCase().includes('hiit')) {
+        category = 'HIIT';
+      }
+      
+      categoryCount[category] = (categoryCount[category] || 0) + 1;
+    });
+
+    // Определяем любимую категорию
+    const favoriteCategory = Object.keys(categoryCount).length > 0
+      ? Object.entries(categoryCount).sort(([,a], [,b]) => b - a)[0][0]
+      : 'Нет данных';
+
+    logger.info('Статистика обработана', {
+      totalWorkouts,
+      totalMinutes,
+      averageDuration,
+      thisWeekCount,
+      thisMonthCount,
+      streak,
+      favoriteCategory,
+      categories: Object.keys(categoryCount)
+    });
 
     setStats({
       totalWorkouts,
@@ -157,19 +207,26 @@ export function StatsPage({ onNavigate }: StatsPageProps) {
       favoriteCategory,
       progressRecords: sortedRecords
     });
+    
+    logger.endFunction('processStatsData');
   };
 
   const clearAllStats = async () => {
+    logger.startFunction('clearAllStats');
     setIsClearing(true);
     
     try {
       const { data: { session } } = await supabase.auth.getSession();
       
       if (!session?.access_token) {
+        logger.warn('Попытка очистки статистики без авторизации');
         toast.error('Необходима авторизация');
         onNavigate('auth');
         return;
       }
+
+      logger.logApiRequest('workout-progress', 'DELETE', null, { Authorization: `Bearer ${session.access_token}` });
+      const startTime = Date.now();
 
       const response = await fetch(`https://${projectId}.supabase.co/functions/v1/make-server-c6c9ad1a/workout-progress`, {
         method: 'DELETE',
@@ -178,8 +235,17 @@ export function StatsPage({ onNavigate }: StatsPageProps) {
         }
       });
 
+      const duration = Date.now() - startTime;
+      logger.logApiResponse('workout-progress', 'DELETE', response.status, null, duration);
+
       if (response.ok) {
+        logger.info('Статистика успешно очищена');
         toast.success('Статистика успешно очищена');
+        
+        // Очищаем localStorage, так как другие компоненты используют его данные
+        localStorage.removeItem('completedWorkouts');
+        logger.info('Очищен localStorage completedWorkouts');
+        
         // Обновляем локальные данные
         setStats({
           totalWorkouts: 0,
@@ -191,20 +257,26 @@ export function StatsPage({ onNavigate }: StatsPageProps) {
           favoriteCategory: 'Нет данных',
           progressRecords: []
         });
+        
+        // Уведомляем другие компоненты об очистке статистики
+        eventBus.emit('stats:cleared');
+        logger.info('Отправлено уведомление stats:cleared');
       } else {
         const result = await response.json();
+        logger.error('Ошибка очистки статистики', new Error(result.error || 'Unknown error'), { status: response.status });
         toast.error(`Ошибка очистки статистики: ${result.error || 'Неизвестная ошибка'}`);
       }
     } catch (error) {
-      console.error('Ошибка очистки статистики:', error);
+      logger.error('Ошибка очистки статистики', error as Error);
       toast.error('Ошибка очистки статистики');
     } finally {
       setIsClearing(false);
+      logger.endFunction('clearAllStats');
     }
   };
 
   const getChartData = () => {
-    if (!stats?.progressRecords || !stats.progressRecords.length) return [];
+    if (!stats?.progressRecords.length) return [];
 
     const now = new Date();
     const daysToShow = selectedPeriod === 'week' ? 7 : selectedPeriod === 'month' ? 30 : 365;
@@ -213,14 +285,14 @@ export function StatsPage({ onNavigate }: StatsPageProps) {
     for (let i = daysToShow - 1; i >= 0; i--) {
       const date = new Date(now.getTime() - i * 24 * 60 * 60 * 1000);
       const dateStr = date.toISOString().split('T')[0];
-
+      
       const dayWorkouts = stats.progressRecords.filter(record => {
         const recordDate = new Date(record.completedAt).toISOString().split('T')[0];
         return recordDate === dateStr;
       });
 
       data.push({
-        date: selectedPeriod === 'week'
+        date: selectedPeriod === 'week' 
           ? ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'][date.getDay()]
           : date.getDate().toString(),
         workouts: dayWorkouts.length,
@@ -234,13 +306,43 @@ export function StatsPage({ onNavigate }: StatsPageProps) {
   const getCategoryData = () => {
     if (!stats?.progressRecords.length) return [];
 
-    // Заглушка для категорий (в реальном приложении эти данные должны приходить с сервера)
-    return [
-      { name: 'Силовые', value: 45, color: '#030213' },
-      { name: 'Кардио', value: 25, color: '#6b7280' },
-      { name: 'Растяжка', value: 20, color: '#9ca3af' },
-      { name: 'Йога', value: 10, color: '#d1d5db' }
-    ];
+    // Анализируем реальные данные о тренировках
+    const categoryCount: Record<string, number> = {};
+    stats.progressRecords.forEach(record => {
+      let category = 'Тренировка';
+      if (record.workoutName.toLowerCase().includes('кардио')) {
+        category = 'Кардио';
+      } else if (record.workoutName.toLowerCase().includes('сил') || record.workoutName.toLowerCase().includes('сила')) {
+        category = 'Силовые';
+      } else if (record.workoutName.toLowerCase().includes('йога')) {
+        category = 'Йога';
+      } else if (record.workoutName.toLowerCase().includes('растяж') || record.workoutName.toLowerCase().includes('стретч')) {
+        category = 'Растяжка';
+      } else if (record.workoutName.toLowerCase().includes('hiit')) {
+        category = 'HIIT';
+      }
+      
+      categoryCount[category] = (categoryCount[category] || 0) + 1;
+    });
+
+    // Конвертируем в проценты
+    const total = Object.values(categoryCount).reduce((sum, count) => sum + count, 0);
+    const categoryColors: Record<string, string> = {
+      'Силовые': '#030213',
+      'Кардио': '#6b7280',
+      'Растяжка': '#9ca3af',
+      'Йога': '#d1d5db',
+      'HIIT': '#f59e0b',
+      'Тренировка': '#6b7280'
+    };
+
+    return Object.entries(categoryCount)
+      .map(([name, value]) => ({
+        name,
+        value: Math.round((value / total) * 100),
+        color: categoryColors[name] || '#6b7280'
+      }))
+      .sort((a, b) => b.value - a.value);
   };
 
   const getWeeklyProgress = () => {
@@ -502,8 +604,8 @@ export function StatsPage({ onNavigate }: StatsPageProps) {
                 <div className="font-medium">Месяц тренировок</div>
                 <div className="text-sm text-muted-foreground">30 дней активности</div>
               </div>
-              <Badge variant={stats?.thisMonthCount && stats.thisMonthCount >= 12 ? "secondary" : "outline"}>
-                {stats?.thisMonthCount && stats.thisMonthCount >= 12 ? "✓" : "—"}
+              <Badge variant={stats?.thisMonthCount && stats.thisMonthCount >= 30 ? "secondary" : "outline"}>
+                {stats?.thisMonthCount && stats.thisMonthCount >= 30 ? "✓" : "—"}
               </Badge>
             </div>
           </div>

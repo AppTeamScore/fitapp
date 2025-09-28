@@ -5,6 +5,8 @@ import { Button } from "./ui/button";
 import { Progress } from "./ui/progress";
 import { ProgressWidget } from "./ProgressWidget";
 import { NotificationBanner } from "./NotificationBanner";
+import { eventBus } from "../utils/events";
+import { logger } from "../utils/logger";
 
 interface HomePageProps {
   onNavigate: (page: string) => void;
@@ -21,6 +23,16 @@ export function HomePage({ onNavigate, user, onLogout }: HomePageProps) {
 
   useEffect(() => {
     loadUserStats();
+    
+    // Подписываемся на событие очистки статистики
+    const unsubscribeStatsCleared = eventBus.on('stats:cleared', () => {
+      logger.info('Получено уведомление об очистке статистики, обновляем данные');
+      loadUserStats();
+    });
+    
+    return () => {
+      unsubscribeStatsCleared();
+    };
   }, []);
 
   const loadUserStats = () => {
@@ -93,7 +105,7 @@ export function HomePage({ onNavigate, user, onLogout }: HomePageProps) {
         <div className="p-4 space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-bold">Твой фитнес AI</h1>
+              <h1 className="text-2xl font-bold">Твой Фитнес AI</h1>
               <p className="text-primary-foreground/90">
                 Привет, {user?.user_metadata?.name || 'Пользователь'}!
               </p>

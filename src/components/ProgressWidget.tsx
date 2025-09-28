@@ -3,6 +3,8 @@ import { TrendingUp, Target, Clock, Calendar, Award } from 'lucide-react';
 import { Card, CardContent } from './ui/card';
 import { Progress } from './ui/progress';
 import { Badge } from './ui/badge';
+import { eventBus } from '../utils/events';
+import { logger } from '../utils/logger';
 
 interface ProgressWidgetProps {
   className?: string;
@@ -27,6 +29,16 @@ export function ProgressWidget({ className = '' }: ProgressWidgetProps) {
 
   useEffect(() => {
     loadQuickStats();
+    
+    // Подписываемся на событие очистки статистики
+    const unsubscribeStatsCleared = eventBus.on('stats:cleared', () => {
+      logger.info('ProgressWidget: Получено уведомление об очистке статистики, обновляем данные');
+      loadQuickStats();
+    });
+    
+    return () => {
+      unsubscribeStatsCleared();
+    };
   }, []);
 
   const loadQuickStats = () => {

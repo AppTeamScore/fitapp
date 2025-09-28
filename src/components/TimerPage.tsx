@@ -57,6 +57,13 @@ export function TimerPage({ onNavigate, workout }: TimerPageProps) {
       }, 1000);
     } else if (timeLeft === 0) {
       if (!isResting) {
+        // Если это последнее упражнение, завершаем тренировку сразу
+        if (currentExerciseIndex >= totalExercises - 1) {
+          setIsRunning(false);
+          handleWorkoutComplete();
+          return;
+        }
+        
         // Переход к отдыху
         setIsResting(true);
         setTimeLeft(currentExercise?.rest || 15);

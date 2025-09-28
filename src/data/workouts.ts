@@ -15,9 +15,9 @@ export const workouts: Workout[] = [
   {
     id: 1,
     name: "Кардио для начинающих",
-    duration: 25,
+    duration: 20,
     difficulty: "Легко",
-    exercises: 10,
+    exercises: 8,
     description: "Легкие кардио упражнения для разминки и улучшения выносливости",
     category: "Кардио",
     exercises_list: [
@@ -25,8 +25,8 @@ export const workouts: Workout[] = [
         id: "video_230",
         name: "Марш на месте",
         video: "video_230.mp4",
-        duration: 45,
-        rest: 15,
+        duration: 30,
+        rest: 10,
         category: "Кардио",
         difficulty: "Легко",
         muscleGroups: ["Ноги", "Кардио"]
@@ -35,100 +35,80 @@ export const workouts: Workout[] = [
         id: "video_049",
         name: "Марш на месте с разведением плеч",
         video: "video_049.mp4",
-        duration: 45,
-        rest: 15,
+        duration: 30,
+        rest: 10,
         category: "Кардио",
         difficulty: "Легко",
         muscleGroups: ["Плечи", "Кардио"]
-      },
-      {
-        id: "video_098",
-        name: "Бег на месте",
-        video: "video_098.mp4",
-        duration: 30,
-        rest: 15,
-        category: "Кардио",
-        difficulty: "Легко",
-        muscleGroups: ["Ноги", "Кардио"]
       },
       {
         id: "video_023",
         name: "Шаг 'Джек'",
         video: "video_023.mp4",
         duration: 30,
-        rest: 15,
-        category: "Кардио",
-        difficulty: "Легко",
-        muscleGroups: ["Ноги", "Кардио"]
-      },
-      {
-        id: "video_101",
-        name: "Приставные шаги",
-        video: "video_101.mp4",
-        duration: 30,
         rest: 10,
         category: "Кардио",
         difficulty: "Легко",
-        muscleGroups: ["Ноги"]
-      },
-      {
-        id: "video_006",
-        name: "Прыжки звездочка",
-        video: "video_006.mp4",
-        duration: 30,
-        rest: 20,
-        category: "Кардио",
-        difficulty: "Легко",
-        muscleGroups: ["Все тело"]
-      },
-      {
-        id: "video_102",
-        name: "Захлест голени",
-        video: "video_102.mp4",
-        duration: 30,
-        rest: 15,
-        category: "Кардио",
-        difficulty: "Легко",
         muscleGroups: ["Ноги", "Кардио"]
-      },
-      {
-        id: "video_076",
-        name: "Приседания",
-        video: "video_076.mp4",
-        duration: 30,
-        rest: 15,
-        category: "Сила",
-        difficulty: "Легко",
-        muscleGroups: ["Ноги", "Ягодицы"]
       },
       {
         id: "video_116",
         name: "Круговые движения рук с шагом назад",
         video: "video_116.mp4",
         duration: 30,
-        rest: 15,
+        rest: 10,
         category: "Кардио",
         difficulty: "Легко",
         muscleGroups: ["Плечи", "Кардио"]
       },
       {
-        id: "video_100",
-        name: "Степ-ап",
-        video: "video_100.mp4",
+        id: "video_006",
+        name: "Прыжки звездочка",
+        video: "video_006.mp4",
+        duration: 30,
+        rest: 15,
+        category: "Кардио",
+        difficulty: "Легко",
+        muscleGroups: ["Все тело"]
+      },
+      {
+        id: "video_181",
+        name: "Прыжки на месте с высоким поднятием коленей",
+        video: "video_181.mp4",
+        duration: 30,
+        rest: 15,
+        category: "Кардио",
+        difficulty: "Средне",
+        muscleGroups: ["Ноги", "Кардио"]
+      },
+      {
+        id: "video_104",
+        name: "Прыжки с приседом",
+        video: "video_104.mp4",
         duration: 30,
         rest: 15,
         category: "Кардио",
         difficulty: "Средне",
         muscleGroups: ["Ноги", "Ягодицы"]
+      },
+      {
+        id: "video_249",
+        name: "Бег",
+        video: "video_249.mp4",
+        duration: 30,
+        rest: 15,
+        category: "Кардио",
+        difficulty: "Средне",
+        muscleGroups: ["Ноги", "Кардио"]
       }
     ]
   },
   {
     id: 2,
     name: "Силовая тренировка верха",
-    duration: 40,
+    duration: 35,
     difficulty: "Средне",
-    exercises: 12,
+    exercises: 10,
     description: "Комплексная тренировка для укрепления мышц верхней части тела",
     category: "Сила",
     exercises_list: [
@@ -183,25 +163,14 @@ export const workouts: Workout[] = [
         muscleGroups: ["Грудь", "Плечи"]
       },
       {
-        id: "video_034",
+        id: "video_021",
         name: "Сгибание рук с гантелями",
-        video: "video_034.mp4",
-        duration: 35,
-        rest: 20,
-        category: "Сила",
-        difficulty: "Легко",
-        muscleGroups: ["Бицепс"],
-        hasWeight: true
-      },
-      {
-        id: "video_002",
-        name: "Чередующий молотковый подъем гантелей",
-        video: "video_002.mp4",
-        duration: 35,
+        video: "video_021.mp4",
+        duration: 40,
         rest: 20,
         category: "Сила",
         difficulty: "Средне",
-        muscleGroups: ["Бицепс", "Предплечья"],
+        muscleGroups: ["Бицепс"],
         hasWeight: true
       },
       {
@@ -215,24 +184,13 @@ export const workouts: Workout[] = [
         muscleGroups: ["Трицепс", "Плечи"]
       },
       {
-        id: "video_030",
-        name: "Жим гантелей стоя",
-        video: "video_030.mp4",
+        id: "video_118",
+        name: "Боковой подъем гантелей стоя",
+        video: "video_118.mp4",
         duration: 40,
-        rest: 25,
-        category: "Сила",
-        difficulty: "Средне",
-        muscleGroups: ["Плечи", "Трицепс"],
-        hasWeight: true
-      },
-      {
-        id: "video_031",
-        name: "Разведение гантелей стоя",
-        video: "video_031.mp4",
-        duration: 35,
         rest: 20,
         category: "Сила",
-        difficulty: "Легко",
+        difficulty: "Средне",
         muscleGroups: ["Плечи"],
         hasWeight: true
       },
@@ -246,16 +204,6 @@ export const workouts: Workout[] = [
         difficulty: "Средне",
         muscleGroups: ["Трицепс"],
         hasWeight: true
-      },
-      {
-        id: "video_185",
-        name: "Отжимания Щука",
-        video: "video_185.mp4",
-        duration: 30,
-        rest: 25,
-        category: "Сила",
-        difficulty: "Средне",
-        muscleGroups: ["Плечи", "Трицепс"]
       },
       {
         id: "video_136",
@@ -272,14 +220,14 @@ export const workouts: Workout[] = [
   {
     id: 3,
     name: "HIIT интенсив",
-    duration: 30,
+    duration: 25,
     difficulty: "Сложно",
-    exercises: 10,
+    exercises: 8,
     description: "Высокоинтенсивная интервальная тренировка для сжигания калорий",
     category: "HIIT",
     exercises_list: [
       {
-        id: "video_232",
+        id: "video_232_hiit",
         name: "Берпи",
         video: "video_232.mp4",
         duration: 45,
@@ -289,57 +237,7 @@ export const workouts: Workout[] = [
         muscleGroups: ["Все тело"]
       },
       {
-        id: "video_117",
-        name: "Альпинист",
-        video: "video_117.mp4",
-        duration: 30,
-        rest: 15,
-        category: "HIIT",
-        difficulty: "Сложно",
-        muscleGroups: ["Все тело"]
-      },
-      {
-        id: "video_006",
-        name: "Прыжки звездочка",
-        video: "video_006.mp4",
-        duration: 30,
-        rest: 10,
-        category: "HIIT",
-        difficulty: "Средне",
-        muscleGroups: ["Все тело"]
-      },
-      {
-        id: "video_181",
-        name: "Прыжки на месте с высоким поднятием коленей",
-        video: "video_181.mp4",
-        duration: 30,
-        rest: 15,
-        category: "HIIT",
-        difficulty: "Средне",
-        muscleGroups: ["Ноги", "Кардио"]
-      },
-      {
-        id: "video_118",
-        name: "Планка-прыжок",
-        video: "video_118.mp4",
-        duration: 30,
-        rest: 15,
-        category: "HIIT",
-        difficulty: "Сложно",
-        muscleGroups: ["Все тело"]
-      },
-      {
-        id: "video_104",
-        name: "Прыжки с приседом",
-        video: "video_104.mp4",
-        duration: 30,
-        rest: 15,
-        category: "HIIT",
-        difficulty: "Средне",
-        muscleGroups: ["Ноги", "Ягодицы"]
-      },
-      {
-        id: "video_120",
+        id: "video_120_hiit",
         name: "Дровосек с собственным весом",
         video: "video_120.mp4",
         duration: 45,
@@ -349,33 +247,63 @@ export const workouts: Workout[] = [
         muscleGroups: ["Все тело", "Пресс"]
       },
       {
-        id: "video_121",
-        name: "Прыжки в планке",
-        video: "video_121.mp4",
+        id: "video_006_hiit",
+        name: "Прыжки звездочка",
+        video: "video_006.mp4",
         duration: 30,
-        rest: 15,
+        rest: 10,
         category: "HIIT",
-        difficulty: "Сложно",
+        difficulty: "Средне",
         muscleGroups: ["Все тело"]
       },
       {
-        id: "video_122",
-        name: "Берпи с отжиманием",
-        video: "video_122.mp4",
-        duration: 45,
-        rest: 20,
-        category: "HIIT",
-        difficulty: "Сложно",
-        muscleGroups: ["Все тело"]
-      },
-      {
-        id: "video_124",
-        name: "Прыжки звезда с приседом",
-        video: "video_124.mp4",
+        id: "video_181_hiit",
+        name: "Прыжки на месте с высоким поднятием коленей",
+        video: "video_181.mp4",
         duration: 30,
         rest: 15,
         category: "HIIT",
         difficulty: "Средне",
+        muscleGroups: ["Ноги", "Кардио"]
+      },
+      {
+        id: "video_104_hiit",
+        name: "Прыжки с приседом",
+        video: "video_104.mp4",
+        duration: 30,
+        rest: 15,
+        category: "HIIT",
+        difficulty: "Средне",
+        muscleGroups: ["Ноги", "Ягодицы"]
+      },
+      {
+        id: "video_141",
+        name: "Хлопки пальцами",
+        video: "video_141.mp4",
+        duration: 30,
+        rest: 10,
+        category: "HIIT",
+        difficulty: "Легко",
+        muscleGroups: ["Кардио"]
+      },
+      {
+        id: "video_147",
+        name: "Обратные выпады с движением рук вперед",
+        video: "video_147.mp4",
+        duration: 45,
+        rest: 15,
+        category: "HIIT",
+        difficulty: "Средне",
+        muscleGroups: ["Ноги", "Плечи"]
+      },
+      {
+        id: "video_232_hiit",
+        name: "Берпи",
+        video: "video_232.mp4",
+        duration: 30,
+        rest: 15,
+        category: "HIIT",
+        difficulty: "Сложно",
         muscleGroups: ["Все тело"]
       }
     ]
@@ -385,7 +313,7 @@ export const workouts: Workout[] = [
     name: "Тренировка пресса",
     duration: 20,
     difficulty: "Средне",
-    exercises: 12,
+    exercises: 10,
     description: "Целенаправленная работа над мышцами пресса и стабилизацией",
     category: "Пресс",
     exercises_list: [
@@ -393,16 +321,6 @@ export const workouts: Workout[] = [
         id: "video_001",
         name: "Скручивания на полу",
         video: "video_001.mp4",
-        duration: 30,
-        rest: 15,
-        category: "Пресс",
-        difficulty: "Легко",
-        muscleGroups: ["Пресс"]
-      },
-      {
-        id: "video_209",
-        name: "Скручивания на полу",
-        video: "video_209.mp4",
         duration: 30,
         rest: 15,
         category: "Пресс",
@@ -470,26 +388,6 @@ export const workouts: Workout[] = [
         muscleGroups: ["Пресс", "Косые"]
       },
       {
-        id: "video_187",
-        name: "Скручивания с подтягиваем коленей",
-        video: "video_187.mp4",
-        duration: 30,
-        rest: 15,
-        category: "Пресс",
-        difficulty: "Средне",
-        muscleGroups: ["Пресс"]
-      },
-      {
-        id: "video_205",
-        name: "Чередующиеся косые скручивания",
-        video: "video_205.mp4",
-        duration: 30,
-        rest: 15,
-        category: "Пресс",
-        difficulty: "Средне",
-        muscleGroups: ["Косые мышцы"]
-      },
-      {
         id: "video_136",
         name: "Планка",
         video: "video_136.mp4",
@@ -508,15 +406,25 @@ export const workouts: Workout[] = [
         category: "Пресс",
         difficulty: "Сложно",
         muscleGroups: ["Косые", "Стабилизация"]
+      },
+      {
+        id: "video_115",
+        name: "Кошачьи потягивания",
+        video: "video_115.mp4",
+        duration: 45,
+        rest: 10,
+        category: "Пресс",
+        difficulty: "Легко",
+        muscleGroups: ["Спина", "Мобильность"]
       }
     ]
   },
   {
     id: 5,
     name: "Тренировка ног",
-    duration: 35,
+    duration: 30,
     difficulty: "Средне",
-    exercises: 12,
+    exercises: 10,
     description: "Комплексная тренировка для укрепления мышц ног и ягодиц",
     category: "Сила",
     exercises_list: [
@@ -529,57 +437,6 @@ export const workouts: Workout[] = [
         category: "Сила",
         difficulty: "Легко",
         muscleGroups: ["Ноги", "Ягодицы"]
-      },
-      {
-        id: "video_218",
-        name: "Приседания сумо",
-        video: "video_218.mp4",
-        duration: 45,
-        rest: 20,
-        category: "Сила",
-        difficulty: "Средне",
-        muscleGroups: ["Ноги", "Ягодицы"]
-      },
-      {
-        id: "video_082",
-        name: "Приседания плие",
-        video: "video_082.mp4",
-        duration: 40,
-        rest: 15,
-        category: "Сила",
-        difficulty: "Легко",
-        muscleGroups: ["Ноги", "Ягодицы"]
-      },
-      {
-        id: "video_159",
-        name: "Выпады вперед",
-        video: "video_159.mp4",
-        duration: 40,
-        rest: 20,
-        category: "Сила",
-        difficulty: "Средне",
-        muscleGroups: ["Ноги", "Ягодицы"]
-      },
-      {
-        id: "video_016",
-        name: "Боковые выпады",
-        video: "video_016.mp4",
-        duration: 40,
-        rest: 20,
-        category: "Сила",
-        difficulty: "Средне",
-        muscleGroups: ["Ноги", "Ягодицы"]
-      },
-      {
-        id: "video_081",
-        name: "Выпады в сторону с гантелями",
-        video: "video_081.mp4",
-        duration: 40,
-        rest: 20,
-        category: "Сила",
-        difficulty: "Средне",
-        muscleGroups: ["Ноги", "Ягодицы"],
-        hasWeight: true
       },
       {
         id: "video_084",
@@ -602,14 +459,26 @@ export const workouts: Workout[] = [
         muscleGroups: ["Ягодицы", "Стабилизация"]
       },
       {
-        id: "video_083",
-        name: "Подъемы ног в стороны",
-        video: "video_083.mp4",
-        duration: 30,
-        rest: 15,
+        id: "video_077",
+        name: "Приседания с гантелями",
+        video: "video_077.mp4",
+        duration: 45,
+        rest: 20,
         category: "Сила",
-        difficulty: "Легко",
-        muscleGroups: ["Ягодицы", "Внешняя поверхность бедра"]
+        difficulty: "Средне",
+        muscleGroups: ["Ноги", "Ягодицы"],
+        hasWeight: true
+      },
+      {
+        id: "video_140",
+        name: "Выпады с гантелями",
+        video: "video_140.mp4",
+        duration: 40,
+        rest: 20,
+        category: "Сила",
+        difficulty: "Средне",
+        muscleGroups: ["Ноги", "Ягодицы"],
+        hasWeight: true
       },
       {
         id: "video_074",
@@ -622,13 +491,24 @@ export const workouts: Workout[] = [
         muscleGroups: ["Икры"]
       },
       {
-        id: "video_162",
-        name: "Казачий присед",
-        video: "video_162.mp4",
-        duration: 35,
-        rest: 25,
+        id: "video_075",
+        name: "Подъемы на носки с гантелями",
+        video: "video_075.mp4",
+        duration: 40,
+        rest: 20,
         category: "Сила",
-        difficulty: "Сложно",
+        difficulty: "Средне",
+        muscleGroups: ["Икры"],
+        hasWeight: true
+      },
+      {
+        id: "video_104",
+        name: "Прыжки с приседом",
+        video: "video_104.mp4",
+        duration: 30,
+        rest: 15,
+        category: "Сила",
+        difficulty: "Средне",
         muscleGroups: ["Ноги", "Ягодицы"]
       },
       {
@@ -640,13 +520,23 @@ export const workouts: Workout[] = [
         category: "Пресс",
         difficulty: "Средне",
         muscleGroups: ["Пресс", "Стабилизация"]
+      },
+      {
+        id: "video_115",
+        name: "Кошачьи потягивания",
+        video: "video_115.mp4",
+        duration: 45,
+        rest: 10,
+        category: "Сила",
+        difficulty: "Легко",
+        muscleGroups: ["Спина", "Мобильность"]
       }
     ]
   },
   {
     id: 6,
     name: "Растяжка и восстановление",
-    duration: 20,
+    duration: 25,
     difficulty: "Легко",
     exercises: 10,
     description: "Мягкие упражнения для растяжки и восстановления после тренировок",
@@ -757,9 +647,9 @@ export const workouts: Workout[] = [
   {
     id: 7,
     name: "Силовая тренировка с гантелями",
-    duration: 45,
+    duration: 40,
     difficulty: "Средне",
-    exercises: 12,
+    exercises: 10,
     description: "Комплексная тренировка всего тела с использованием гантелей",
     category: "Сила",
     exercises_list: [
@@ -783,17 +673,6 @@ export const workouts: Workout[] = [
         category: "Сила",
         difficulty: "Средне",
         muscleGroups: ["Грудь"],
-        hasWeight: true
-      },
-      {
-        id: "video_030",
-        name: "Жим гантелей стоя",
-        video: "video_030.mp4",
-        duration: 40,
-        rest: 25,
-        category: "Сила",
-        difficulty: "Средне",
-        muscleGroups: ["Плечи", "Трицепс"],
         hasWeight: true
       },
       {
@@ -871,17 +750,6 @@ export const workouts: Workout[] = [
         category: "Сила",
         difficulty: "Средне",
         muscleGroups: ["Ягодицы", "Бицепс бедра"],
-        hasWeight: true
-      },
-      {
-        id: "video_140",
-        name: "Выпады с гантелями",
-        video: "video_140.mp4",
-        duration: 40,
-        rest: 20,
-        category: "Сила",
-        difficulty: "Средне",
-        muscleGroups: ["Ноги", "Ягодицы"],
         hasWeight: true
       },
       {

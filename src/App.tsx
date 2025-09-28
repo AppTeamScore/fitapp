@@ -17,6 +17,7 @@ import { LoadingSpinner } from './components/LoadingSpinner';
 import { supabase } from './utils/supabase/client';
 import { projectId } from './utils/supabase/info';
 import { Workout } from './data/workouts';
+import { logger } from './utils/logger';
 
 export default function App() {
   const [currentPage, setCurrentPage] = useState<string>('loading');
@@ -25,26 +26,34 @@ export default function App() {
   const [needsOnboarding, setNeedsOnboarding] = useState(false);
 
   useEffect(() => {
+    logger.startFunction('App initialization');
     checkAuth();
+    logger.endFunction('App initialization');
   }, []);
 
   const checkAuth = async () => {
+    logger.startFunction('checkAuth');
     try {
       const { data: { session } } = await supabase.auth.getSession();
       
       if (session?.user) {
+        logger.info('Пользователь авторизован', { userId: session.user.id });
         setUser(session.user);
         await checkOnboardingStatus(session.access_token);
       } else {
+        logger.info('Пользователь не авторизован, переход на страницу авторизации');
         setCurrentPage('auth');
       }
     } catch (error) {
-      console.error('Ошибка проверки авторизации:', error);
+      logger.error('Ошибка проверки авторизации', error as Error);
       setCurrentPage('auth');
+    } finally {
+      logger.endFunction('checkAuth');
     }
   };
 
   const checkOnboardingStatus = async (accessToken: string) => {
+    logger.startFunction('checkOnboardingStatus', { accessToken: '***' });
     try {
       const response = await fetch(`https://${projectId}.supabase.co/functions/v1/make-server-c6c9ad1a/profile`, {
         headers: {
@@ -55,49 +64,67 @@ export default function App() {
       const result = await response.json();
       
       if (response.ok && result.profile?.onboardingCompleted) {
+        logger.info('Онбординг завершен, переход на главную страницу');
         setCurrentPage('home');
       } else {
+        logger.info('Требуется онбординг', { hasProfile: !!result.profile });
         setNeedsOnboarding(true);
         setCurrentPage('onboarding');
       }
     } catch (error) {
-      console.error('Ошибка проверки онбординга:', error);
+      logger.error('Ошибка проверки онбординга', error as Error);
       // Если сервер недоступен, все равно позволяем войти в приложение
+      logger.warn('Сервер недоступен, разрешаем вход без онбординга');
       setCurrentPage('home');
+    } finally {
+      logger.endFunction('checkOnboardingStatus');
     }
   };
 
   const handleAuthSuccess = async (authUser: any) => {
+    logger.startFunction('handleAuthSuccess', { userId: authUser.id });
+    logger.logUserAction('Успешная авторизация', { userId: authUser.id });
     setUser(authUser);
     // Получаем актуальную сессию для токена
     const { data: { session } } = await supabase.auth.getSession();
     if (session?.access_token) {
       await checkOnboardingStatus(session.access_token);
     } else {
+      logger.warn('Не удалось получить токен сессии после авторизации');
       setNeedsOnboarding(true);
       setCurrentPage('onboarding');
     }
+    logger.endFunction('handleAuthSuccess');
   };
 
   const handleOnboardingComplete = () => {
+    logger.logUserAction('Завершение онбординга');
+    logger.info('Онбординг завершен, переход на главную страницу');
     setNeedsOnboarding(false);
     setCurrentPage('home');
   };
 
   const handleNavigate = (page: string) => {
+    logger.logUserAction('Навигация', { fromPage: currentPage, toPage: page });
+    logger.logAppState(`Переход на страницу: ${page}`, { previousPage: currentPage });
     setCurrentPage(page);
   };
 
   const handleStartWorkout = (workout: Workout) => {
+    logger.logUserAction('Начало тренировки', { workoutId: workout.id, workoutName: workout.name });
+    logger.info('Запуск тренировки', { workoutId: workout.id, workoutName: workout.name });
     setCurrentWorkout(workout);
     setCurrentPage('timer');
   };
 
   const handleLogout = async () => {
+    logger.startFunction('handleLogout');
+    logger.logUserAction('Выход из аккаунта');
     await supabase.auth.signOut();
     setUser(null);
     setNeedsOnboarding(false);
     setCurrentPage('auth');
+    logger.endFunction('handleLogout');
   };
 
   const renderCurrentPage = () => {

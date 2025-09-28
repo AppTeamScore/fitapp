@@ -2,6 +2,7 @@ import { Component, ErrorInfo, ReactNode } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Button } from './ui/button';
 import { AlertCircle, RotateCcw } from 'lucide-react';
+import { logger } from '../utils/logger';
 
 interface Props {
   children: ReactNode;
@@ -23,7 +24,10 @@ class ErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    console.error('Ошибка в компоненте:', error, errorInfo);
+    logger.error('Ошибка в компоненте ErrorBoundary', error, {
+      componentStack: errorInfo.componentStack,
+      errorBoundary: true
+    });
   }
 
   render() {
