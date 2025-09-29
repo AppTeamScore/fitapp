@@ -83,6 +83,7 @@ export function TimerPage({ onNavigate, workout }: TimerPageProps) {
       // Автоматическая остановка при истечении времени, но без перехода к следующему
       setIsRunning(false);
       toast.info('Подход завершен');
+      playBeep();
     }
 
     return () => clearInterval(interval);
@@ -107,10 +108,27 @@ export function TimerPage({ onNavigate, workout }: TimerPageProps) {
       setIsRestRunning(false);
       toast.info('Отдых завершен');
       setIsRestModalOpen(false);
+      playBeep();
     }
 
     return () => clearInterval(interval);
   }, [isRestRunning, restTimeLeft]);
+
+  const playBeep = () => {
+    if (typeof window !== 'undefined') {
+      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const oscillator = audioContext.createOscillator();
+      const gainNode = audioContext.createGain();
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+      oscillator.frequency.value = 850;
+      oscillator.type = 'sine';
+      gainNode.gain.setValueAtTime(0.5, audioContext.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 1.0);
+      oscillator.start(audioContext.currentTime);
+      oscillator.stop(audioContext.currentTime + 1.0);
+    }
+  };
 
   const handleWorkoutComplete = async () => {
     const endTime = new Date();

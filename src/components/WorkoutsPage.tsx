@@ -53,9 +53,6 @@ export function WorkoutsPage({ onNavigate, onStartWorkout }: WorkoutsPageProps) 
             </Button>
             <h1 className="text-2xl font-bold">Готовые тренировки</h1>
           </div>
-          <p className="text-muted-foreground mt-1">
-            Выберите подходящую тренировку
-          </p>
         </div>
       </div>
 
