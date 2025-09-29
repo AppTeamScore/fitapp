@@ -677,7 +677,7 @@ export function StatsPage({ onNavigate }: StatsPageProps) {
                   <div className="text-right">
                     <div className="font-medium">{record.duration || 0} мин</div>
                     <div className="text-sm text-muted-foreground">
-                      {record.completedExercises || 0}/{record.totalExercises || 0} упр.
+                      {record.completedExercises+1 || 0}/{record.totalExercises || 0} упр.
                     </div>
                   </div>
                 </div>

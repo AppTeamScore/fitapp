@@ -221,9 +221,11 @@ export function TimerPage({ onNavigate, workout }: TimerPageProps) {
       // Переход к следующему упражнению
       setCompletedExercises(prev => prev + 1);
       setCompletedSets(prev => prev + 1);
-      setCurrentExerciseIndex(prev => prev + 1);
-      setCurrentSetIndex(0);
+      // setCurrentExerciseIndex(prev => prev + 1);
+      // setCurrentSetIndex(0);
       if (currentExerciseIndex + 1 < totalExercises) {
+        setCurrentExerciseIndex(prev => prev + 1);
+        setCurrentSetIndex(0);
         setTimeLeft(currentExercise?.duration || 30);
       } else {
         handleWorkoutComplete();
@@ -253,9 +255,11 @@ export function TimerPage({ onNavigate, workout }: TimerPageProps) {
     setCompletedExercises(prev => prev + 1);
     setCompletedSets(prev => prev + (currentSets - currentSetIndex));
     const nextIndex = currentExerciseIndex + 1;
-    setCurrentExerciseIndex(nextIndex);
-    setCurrentSetIndex(0);
+    // setCurrentExerciseIndex(nextIndex);
+    // setCurrentSetIndex(0);
     if (nextIndex < totalExercises) {
+      setCurrentExerciseIndex(nextIndex);
+      setCurrentSetIndex(0);
       setTimeLeft(currentExercise?.duration || 30);
     } else {
       handleWorkoutComplete();
@@ -442,7 +446,7 @@ export function TimerPage({ onNavigate, workout }: TimerPageProps) {
         <CardContent className="p-4">
           <div className="space-y-2">
             <div className="flex justify-between text-sm">
-              <span>Прогресс: Упражнение {currentExerciseIndex}/{totalExercises}</span>
+              <span>Прогресс: Упражнение {currentExerciseIndex + 1}/{totalExercises}</span>
               <span>{currentSetIndex}/{currentSets} подходов</span>
             </div>
             <Progress value={progress} className="h-2" />
