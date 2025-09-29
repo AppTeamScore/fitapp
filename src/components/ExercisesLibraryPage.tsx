@@ -151,17 +151,12 @@ export function ExercisesLibraryPage({ onNavigate, onStartWorkout }: ExercisesLi
                     </div>
 
                     <div className="flex items-center gap-4 text-sm text-muted-foreground mb-3">
-                      <div className="flex items-center">
-                        <Clock className="h-4 w-4 mr-1" />
-                        {exercise.duration}с
-                      </div>
+
                       <div className="flex items-center">
                         <Target className="h-4 w-4 mr-1" />
                         {exercise.muscleGroups.join(", ")}
                       </div>
                     </div>
-
-                    
                   </div>
 
                   <div className="ml-4 flex flex-col gap-2">

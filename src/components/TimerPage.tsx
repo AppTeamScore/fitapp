@@ -338,55 +338,60 @@ export function TimerPage({ onNavigate, workout }: TimerPageProps) {
       {/* Навигация по упражнениям */}
       <Card>
         <CardContent className="p-4">
-          <div className="flex flex-col sm:flex-row gap-2 justify-center items-center">
-            <Button
-              onClick={previousExercise}
-              variant="outline"
-              size="sm"
-              className="min-w-[100px]"
-              disabled={currentExerciseIndex === 0}
-            >
-              ← Предыдущее
-            </Button>
-            <Button
-              onClick={nextSet}
-              size="sm"
-              className="min-w-[120px]"
-              disabled={currentExerciseIndex >= totalExercises - 1 && isLastSet}
-            >
-              {isLastSet ? 'Закончить упражнение' : 'Следующий подход'}
-            </Button>
-            <Button
-              onClick={skipCurrent}
-              variant="outline"
-              size="sm"
-              className="min-w-[100px]"
-            >
-              Пропустить →
-            </Button>
+          <div className="flex flex-col gap-4">
+            <div className="flex gap-2 justify-center">
+              <Button
+                onClick={previousExercise}
+                variant="outline"
+                size="sm"
+                className="flex-1 min-w-[100px]"
+                disabled={currentExerciseIndex === 0}
+              >
+                ← Предыдущее
+              </Button>
+              <Button
+                onClick={skipCurrent}
+                variant="outline"
+                size="sm"
+                className="flex-1 min-w-[100px]"
+              >
+                Пропустить →
+              </Button>
+            </div>
+            <div className="flex justify-center">
+              <Button
+                onClick={nextSet}
+                size="sm"
+                className="w-full max-w-[200px]"
+                disabled={currentExerciseIndex >= totalExercises - 1 && isLastSet}
+              >
+                {isLastSet ? 'Закончить упражнение' : 'Следующий подход'}
+              </Button>
+            </div>
+            {completedExercises > 0 && (
+              <div className="flex justify-center">
+                <Button
+                  onClick={resetWorkout}
+                  variant="outline"
+                  size="sm"
+                  className="w-full max-w-[200px]"
+                >
+                  Сбросить тренировку
+                </Button>
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>
 
-      {/* Кнопка сброса тренировки */}
-      {completedExercises > 0 && (
-        <div className="flex justify-center">
-          <Button
-            onClick={resetWorkout}
-            variant="outline"
-          >
-            Сбросить тренировку
-          </Button>
-        </div>
-      )}
       
       {/* Кнопки отмены и завершения */}
-      <div className="flex justify-between gap-4">
+      <div className="flex flex-col gap-4">
         <Button
           onClick={() => onNavigate('home')}
           variant="outline"
           size="lg"
-          className="flex-1 h-12"
+          className="w-full h-12"
         >
           Отменить тренировку
         </Button>
@@ -394,7 +399,7 @@ export function TimerPage({ onNavigate, workout }: TimerPageProps) {
           onClick={handleWorkoutComplete}
           variant="default"
           size="lg"
-          className="flex-1 h-12 font-semibold"
+          className="w-full h-12 font-semibold"
         >
           Завершить тренировку
         </Button>
