@@ -411,7 +411,7 @@ export function WorkoutPlanPage({ onNavigate, onStartWorkout }: WorkoutPlanPageP
                   ))}
                   {dayWorkout.exercises.length > 3 && (
                     <div className="text-xs text-muted-foreground text-center py-1">
-                      +{dayWorkout.exercises.length - 3} упра��нений
+                      +{dayWorkout.exercises.length - 3} упражнений
                     </div>
                   )}
                 </div>
