@@ -114,7 +114,7 @@ app.put('/make-server-c6c9ad1a/profile', async (c) => {
   }
 })
 
-// Генерация персонализированного плана тренировок
+// Сохранение сгенерированного плана тренировок (LLM вызывается на клиенте)
 app.post('/make-server-c6c9ad1a/generate-workout-plan', async (c) => {
   try {
     const accessToken = c.req.header('Authorization')?.split(' ')[1]
@@ -129,106 +129,30 @@ app.post('/make-server-c6c9ad1a/generate-workout-plan', async (c) => {
       return c.json({ error: 'Неавторизован' }, 401)
     }
 
-    const { goals, fitnessLevel, limitations, preferences, availableExercises } = await c.req.json()
+    const { plan, goals, fitnessLevel, limitations, preferences } = await c.req.json()
     
-    if (!goals || !fitnessLevel || !availableExercises) {
-      return c.json({ error: 'Необходимые данные отсутствуют' }, 400)
-    }
-
-    // Формируем промпт для LLM
-    const prompt = `Создай персонализированный план тренировок на основе следующих данных:
-
-Цели: ${goals}
-Уровень подготовки: ${fitnessLevel}
-Ограничения: ${limitations || 'Нет'}
-Предпочтения: ${preferences || 'Нет специальных предпочтений'}
-
-Доступные упражнения:
-${availableExercises.map((exercise: any) => `- ${exercise.name} (${exercise.category}, ${exercise.difficulty})`).join('\n')}
-
-Создай план тренировок на неделю, используя ТОЛЬКО упражнения из списка выше. Для каждой тренировки укажи:
-1. День недели
-2. Название тренировки
-3. Список упражнений с количеством подходов и повторений
-4. Продолжительность тренировки
-
-Ответь в формате JSON:
-{
-  "weekPlan": [
-    {
-      "day": "Понедельник",
-      "workoutName": "Название тренировки",
-      "exercises": [
-        {
-          "name": "Название упражнения",
-          "sets": 3,
-          "reps": "10-12",
-          "duration": 30
-        }
-      ],
-      "totalDuration": 45
-    }
-  ],
-  "recommendations": "Общие рекомендации"
-}`
-
-    // Отправляем запрос к LLM API
-    const llmResponse = await fetch('https://text.pollinations.ai/openai', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        messages: [
-          {
-            role: 'user',
-            content: prompt
-          }
-        ],
-        model: 'gpt-4',
-        max_tokens: 2000
-      })
-    })
-
-    if (!llmResponse.ok) {
-      throw new Error(`LLM API ошибка: ${llmResponse.status}`)
-    }
-
-    const llmData = await llmResponse.json()
-    let generatedPlan
-
-    try {
-      // Пытаемся извлечь JSON из ответа
-      const content = llmData.choices?.[0]?.message?.content || llmData.content
-      const jsonMatch = content.match(/\{[\s\S]*\}/)
-      
-      if (jsonMatch) {
-        generatedPlan = JSON.parse(jsonMatch[0])
-      } else {
-        throw new Error('JSON не найден в ответе')
-      }
-    } catch (parseError) {
-      console.log(`Ошибка парсинга ответа LLM: ${parseError}`)
-      return c.json({ error: 'Ошибка обработки ответа от LLM' }, 500)
+    // Проверяем только наличие плана, остальное с fallback на клиенте
+    if (!plan) {
+      return c.json({ error: 'План тренировок не предоставлен' }, 400)
     }
 
     // Сохраняем план пользователя
     const planData = {
       userId: user.id,
-      plan: generatedPlan,
+      plan,
       createdAt: new Date().toISOString(),
-      goals,
-      fitnessLevel,
-      limitations,
-      preferences
+      goals: goals || 'Улучшение общей физической формы',
+      fitnessLevel: fitnessLevel || 'Начинающий',
+      limitations: limitations || 'Нет ограничений',
+      preferences: preferences || 'Разнообразные тренировки'
     }
     
     await kv.set(`workout_plan:${user.id}`, planData)
     
-    return c.json({ plan: generatedPlan, planData })
+    return c.json({ plan, planData })
   } catch (error) {
-    console.log(`Ошибка генерации плана тренировок: ${error}`)
-    return c.json({ error: 'Не удалось сгенерировать план тренировок' }, 500)
+    console.log(`Ошибка сохранения плана тренировок: ${error}`)
+    return c.json({ error: 'Не удалось сохранить план тренировок' }, 500)
   }
 })
 

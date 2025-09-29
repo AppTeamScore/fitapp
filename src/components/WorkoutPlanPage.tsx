@@ -9,6 +9,7 @@ import { toast } from 'sonner@2.0.3';
 import { projectId, publicAnonKey } from '../utils/supabase/info';
 import { supabase } from '../utils/supabase/client';
 import { exercises } from '../data/exercises';
+import { generateWorkoutPlan } from '../utils/llm';
 
 interface WorkoutPlanPageProps {
   onNavigate: (page: string) => void;
@@ -103,25 +104,27 @@ export function WorkoutPlanPage({ onNavigate, onStartWorkout }: WorkoutPlanPageP
 
       const profile = profileResult.profile;
 
-      const response = await fetch(`https://${projectId}.supabase.co/functions/v1/make-server-c6c9ad1a/generate-workout-plan`, {
+      // Генерируем план на клиенте с помощью LLM, передавая все данные профиля
+      const generatedPlan = await generateWorkoutPlan(profile);
+
+      // Сохраняем план на сервере
+      const saveResponse = await fetch(`https://${projectId}.supabase.co/functions/v1/make-server-c6c9ad1a/generate-workout-plan`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${session.access_token}`
         },
         body: JSON.stringify({
-          goals: profile.fitnessGoals || 'Улучшение общей физической формы',
-          fitnessLevel: profile.fitnessLevel || 'Начинающий',
-          limitations: profile.limitations || 'Нет ограничений',
-          preferences: profile.preferences || 'Разнообразные тренировки'
+          plan: generatedPlan,
+          ...profile // Сохраняем все данные профиля для полноты
         })
       });
 
-      const result = await response.json();
+      const saveResult = await saveResponse.json();
       
-      if (response.ok && result.plan) {
+      if (saveResponse.ok && saveResult.plan) {
         const newPlanData = {
-          plan: result.plan,
+          plan: generatedPlan,
           goals: profile.fitnessGoals || 'Улучшение общей физической формы',
           fitnessLevel: profile.fitnessLevel || 'Начинающий',
           limitations: profile.limitations || 'Нет ограничений',
@@ -130,7 +133,7 @@ export function WorkoutPlanPage({ onNavigate, onStartWorkout }: WorkoutPlanPageP
         setPlanData(newPlanData);
         toast.success('Новый план тренировок сгенерирован');
       } else {
-        toast.error(`Ошибка генерации плана: ${result.error}`);
+        toast.error(`Ошибка сохранения плана: ${saveResult.error}`);
       }
     } catch (error) {
       console.error('Ошибка генерации плана:', error);
