@@ -353,8 +353,8 @@ export function ManualWorkoutPlanPage({ onNavigate, onStartWorkout }: ManualWork
         {/* Заголовок */}
         <div className="flex items-center justify-between">
           <div className="flex items-center">
-            <Button 
-              variant="ghost" 
+            <Button
+              variant="ghost"
               size="sm"
               onClick={() => onNavigate('plan')}
               className="mr-4"
@@ -364,9 +364,12 @@ export function ManualWorkoutPlanPage({ onNavigate, onStartWorkout }: ManualWork
             </Button>
             <h1 className="text-2xl font-bold">Создание плана тренировок</h1>
           </div>
-          
-          {!isCreatingWorkout && workoutPlan.length > 0 && (
+        </div>
+
+        {!isCreatingWorkout && workoutPlan.length > 0 && (
+          <div className="flex justify-center mb-6">
             <Button
+              className="w-full max-w-md"
               onClick={savePlan}
               disabled={isSaving}
             >
@@ -382,8 +385,8 @@ export function ManualWorkoutPlanPage({ onNavigate, onStartWorkout }: ManualWork
                 </>
               )}
             </Button>
-          )}
-        </div>
+          </div>
+        )}
 
         {/* Существующие тренировки */}
         {workoutPlan.length > 0 && (

@@ -45,6 +45,7 @@ export function WorkoutPlanPage({ onNavigate, onStartWorkout }: WorkoutPlanPageP
   const [planData, setPlanData] = useState<PlanData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [expandedDays, setExpandedDays] = useState<Set<number>>(new Set());
 
   useEffect(() => {
     loadWorkoutPlan();
@@ -175,6 +176,18 @@ export function WorkoutPlanPage({ onNavigate, onStartWorkout }: WorkoutPlanPageP
     };
 
     onStartWorkout(workout);
+  };
+
+  const toggleExpanded = (dayIndex: number) => {
+    setExpandedDays(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(dayIndex)) {
+        newSet.delete(dayIndex);
+      } else {
+        newSet.add(dayIndex);
+      }
+      return newSet;
+    });
   };
 
   const deletePlan = async () => {
@@ -350,11 +363,11 @@ export function WorkoutPlanPage({ onNavigate, onStartWorkout }: WorkoutPlanPageP
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="space-y-1">
                 <p className="text-sm font-medium text-muted-foreground">Цели</p>
-                <p className="text-sm">{planData.goals}</p>
+                <p className="text-sm">{planData.goals || 'Нет'}</p>
               </div>
               <div className="space-y-1">
                 <p className="text-sm font-medium text-muted-foreground">Уровень</p>
-                <p className="text-sm">{planData.fitnessLevel}</p>
+                <p className="text-sm">{planData.fitnessLevel || 'Нет'}</p>
               </div>
               <div className="space-y-1">
                 <p className="text-sm font-medium text-muted-foreground">Ограничения</p>
@@ -365,7 +378,7 @@ export function WorkoutPlanPage({ onNavigate, onStartWorkout }: WorkoutPlanPageP
             {planData.plan.recommendations && (
               <div className="mt-4 p-4 bg-muted/50 rounded-lg">
                 <p className="text-sm font-medium mb-2">Рекомендации:</p>
-                <p className="text-sm text-muted-foreground">{planData.plan.recommendations}</p>
+                <p className="text-sm text-muted-foreground">{planData.plan.recommendations || 'Из-за редактирования плана, все данные устарели.'}</p>
               </div>
             )}
           </CardContent>
@@ -373,7 +386,7 @@ export function WorkoutPlanPage({ onNavigate, onStartWorkout }: WorkoutPlanPageP
 
         {/* Тренировки по дням */}
         <div className="space-y-4">
-          <h2 className="text-xl font-semibold">Недельный план</h2>
+          <h2 className="text-xl font-semibold"></h2>
           {planData.plan.weekPlan.map((dayWorkout, index) => (
             <Card key={index} className="overflow-hidden">
               <CardHeader className="pb-3">
@@ -392,7 +405,7 @@ export function WorkoutPlanPage({ onNavigate, onStartWorkout }: WorkoutPlanPageP
               </CardHeader>
               <CardContent className="pt-0 flex flex-col flex-1">
                 <div className="space-y-2 mb-4 flex-1">
-                  {dayWorkout.exercises.slice(0, 3).map((exercise, exerciseIndex) => (
+                  {dayWorkout.exercises.slice(0, expandedDays.has(index) ? dayWorkout.exercises.length : 3).map((exercise, exerciseIndex) => (
                     <div key={exerciseIndex} className="text-sm p-2 bg-muted/50 rounded">
                       <p className="font-medium truncate">{exercise.name}</p>
                       <div className="text-xs text-muted-foreground space-y-1">
@@ -410,8 +423,15 @@ export function WorkoutPlanPage({ onNavigate, onStartWorkout }: WorkoutPlanPageP
                     </div>
                   ))}
                   {dayWorkout.exercises.length > 3 && (
-                    <div className="text-xs text-muted-foreground text-center py-1">
-                      +{dayWorkout.exercises.length - 3} упражнений
+                    <div className="text-center py-2">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => toggleExpanded(index)}
+                        className="w-full"
+                      >
+                        {expandedDays.has(index) ? 'Скрыть' : `Показать еще (+${dayWorkout.exercises.length - 3} упражнения)`}
+                      </Button>
                     </div>
                   )}
                 </div>
