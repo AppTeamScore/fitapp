@@ -53,7 +53,7 @@ export function TimerPage({ onNavigate, workout }: TimerPageProps) {
 
   const currentExercise = exercises[currentExerciseIndex] || exercises[0];
   const totalExercises = exercises.length;
-  const currentSets = currentExercise?.sets || 1;
+  const currentSets = (currentExercise as any)?.sets || 1;
   const isLastSet = currentSetIndex >= currentSets - 1;
   const totalSets = exercises.reduce((acc, ex) => acc + (ex.sets || 1), 0);
 
@@ -142,7 +142,6 @@ export function TimerPage({ onNavigate, workout }: TimerPageProps) {
       ? currentExercise?.duration || 30
       : currentExercise?.rest || 60;
     setTimeLeft(presetTime);
-    toast.info(`Таймер установлен на ${presetTime}с (${mode === 'work' ? 'подход' : 'отдых'})`);
   };
 
 
@@ -168,6 +167,11 @@ export function TimerPage({ onNavigate, workout }: TimerPageProps) {
 
   const previousExercise = () => {
     if (currentExerciseIndex > 0) {
+      const prevIndex = currentExerciseIndex - 1;
+      const prevExercise = exercises[prevIndex];
+      const prevSets = (prevExercise as any)?.sets || 1;
+      setCompletedExercises(prev => Math.max(0, prev - 1));
+      setCompletedSets(prev => Math.max(0, prev - prevSets));
       setCurrentExerciseIndex(prev => prev - 1);
       setCurrentSetIndex(0);
       setTimerPreset('work');
@@ -177,7 +181,14 @@ export function TimerPage({ onNavigate, workout }: TimerPageProps) {
   const skipCurrent = () => {
     setCompletedExercises(prev => prev + 1);
     setCompletedSets(prev => prev + (currentSets - currentSetIndex));
-    nextSet();
+    const nextIndex = currentExerciseIndex + 1;
+    setCurrentExerciseIndex(nextIndex);
+    setCurrentSetIndex(0);
+    if (nextIndex < totalExercises) {
+      setTimerPreset('work');
+    } else {
+      handleWorkoutComplete();
+    }
   };
 
   const resetTimer = () => {
@@ -327,7 +338,7 @@ export function TimerPage({ onNavigate, workout }: TimerPageProps) {
         <CardContent className="p-4">
           <div className="space-y-2">
             <div className="flex justify-between text-sm">
-              <span>Прогресс: Упражнение {currentExerciseIndex + 1}/{totalExercises}</span>
+              <span>Прогресс: Упражнение {currentExerciseIndex}/{totalExercises}</span>
               <span>{completedSets}/{totalSets} подходов</span>
             </div>
             <Progress value={progress} className="h-2" />
