@@ -46,6 +46,7 @@ export function WorkoutPlanPage({ onNavigate, onStartWorkout }: WorkoutPlanPageP
   const [isLoading, setIsLoading] = useState(true);
   const [isGenerating, setIsGenerating] = useState(false);
   const [expandedDays, setExpandedDays] = useState<Set<number>>(new Set());
+  const [isRecommendationsExpanded, setIsRecommendationsExpanded] = useState(false);
 
   useEffect(() => {
     loadWorkoutPlan();
@@ -306,9 +307,11 @@ export function WorkoutPlanPage({ onNavigate, onStartWorkout }: WorkoutPlanPageP
             <h1 className="text-2xl font-bold">Ваш план тренировок</h1>
           </div>
           
-          <div className="flex gap-2 flex-wrap">
+          <div className="flex gap-2 flex-wrap justify-center">
             <Button
               variant="outline"
+              size="sm"
+              className="flex-1"
               onClick={() => onNavigate('manual-plan')}
             >
               <Edit className="w-4 h-4 mr-2" />
@@ -316,6 +319,8 @@ export function WorkoutPlanPage({ onNavigate, onStartWorkout }: WorkoutPlanPageP
             </Button>
             <Button
               variant="outline"
+              size="sm"
+              className="flex-1"
               onClick={generateNewPlan}
               disabled={isGenerating}
             >
@@ -328,7 +333,7 @@ export function WorkoutPlanPage({ onNavigate, onStartWorkout }: WorkoutPlanPageP
             </Button>
             <AlertDialog>
               <AlertDialogTrigger asChild>
-                <Button variant="outline" size="sm">
+                <Button variant="outline" size="sm" className="flex-1">
                   <Trash2 className="w-4 h-4 mr-2" />
                   Удалить
                 </Button>
@@ -378,7 +383,28 @@ export function WorkoutPlanPage({ onNavigate, onStartWorkout }: WorkoutPlanPageP
             {planData.plan.recommendations && (
               <div className="mt-4 p-4 bg-muted/50 rounded-lg">
                 <p className="text-sm font-medium mb-2">Рекомендации:</p>
-                <p className="text-sm text-muted-foreground">{planData.plan.recommendations || 'Из-за редактирования плана, все данные устарели.'}</p>
+                {(() => {
+                  const recText = planData.plan.recommendations || 'Из-за редактирования плана, все данные устарели.';
+                  const maxLength = 200;
+                  const isLong = recText.length > maxLength;
+                  const displayText = isLong && !isRecommendationsExpanded ? recText.slice(0, maxLength) + '...' : recText;
+                  
+                  return (
+                    <div className="space-y-2">
+                      <p className="text-sm text-muted-foreground text-justify leading-relaxed hyphens-auto">{displayText}</p>
+                      {isLong && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setIsRecommendationsExpanded(!isRecommendationsExpanded)}
+                          className="w-full justify-center"
+                        >
+                          {isRecommendationsExpanded ? 'Скрыть' : 'Показать полностью'}
+                        </Button>
+                      )}
+                    </div>
+                  );
+                })()}
               </div>
             )}
           </CardContent>

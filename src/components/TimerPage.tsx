@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { Play, Pause, RotateCcw, SkipForward, Info } from "lucide-react";
+import { Play, Pause, RotateCcw, SkipForward, Info, ArrowLeft, MoonStar, SquareMinus, SquarePlus} from "lucide-react";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "./ui/dialog";
 import { Button } from "./ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Progress } from "./ui/progress";
@@ -8,6 +9,13 @@ import { VideoPlayer } from "./VideoPlayer";
 import { toast } from "sonner";
 import { api } from "../utils/api";
 import { type Workout } from "../data/workouts";
+import type { Exercise } from "../data/exercises";
+
+interface ExtendedExercise extends Exercise {
+  sets?: number;
+  reps?: string;
+  weight?: number;
+}
 
 interface TimerPageProps {
   onNavigate: (page: string) => void;
@@ -18,13 +26,15 @@ export function TimerPage({ onNavigate, workout }: TimerPageProps) {
   const [currentExerciseIndex, setCurrentExerciseIndex] = useState(0);
   const [currentSetIndex, setCurrentSetIndex] = useState(0);
   const [timeLeft, setTimeLeft] = useState(workout?.exercises_list?.[0]?.duration || 30);
-  const [timerMode, setTimerMode] = useState<'work' | 'rest'>('work'); // 'work' для подхода, 'rest' для отдыха
   const [isRunning, setIsRunning] = useState(false);
+  const [isRestModalOpen, setIsRestModalOpen] = useState(false);
+  const [restTimeLeft, setRestTimeLeft] = useState(60);
+  const [isRestRunning, setIsRestRunning] = useState(false);
   const [completedExercises, setCompletedExercises] = useState(0);
   const [completedSets, setCompletedSets] = useState(0);
   const [workoutStartTime, setWorkoutStartTime] = useState<Date | null>(null);
 
-  const exercises = workout?.exercises_list || [
+  const defaultExercises: ExtendedExercise[] = [
     {
       id: "default_1",
       name: "Прыжки на месте",
@@ -51,9 +61,14 @@ export function TimerPage({ onNavigate, workout }: TimerPageProps) {
     },
   ];
 
+  const exercises: ExtendedExercise[] = workout?.exercises_list?.map((ex: Exercise) => ({
+    ...ex,
+    sets: (ex as any)?.sets || 1,
+  })) || defaultExercises;
+
   const currentExercise = exercises[currentExerciseIndex] || exercises[0];
   const totalExercises = exercises.length;
-  const currentSets = (currentExercise as any)?.sets || 1;
+  const currentSets = (currentExercise as ExtendedExercise)?.sets || 1;
   const isLastSet = currentSetIndex >= currentSets - 1;
   const totalSets = exercises.reduce((acc, ex) => acc + (ex.sets || 1), 0);
 
@@ -62,24 +77,40 @@ export function TimerPage({ onNavigate, workout }: TimerPageProps) {
     
     if (isRunning && timeLeft > 0) {
       interval = setInterval(() => {
-        setTimeLeft((prev) => prev - 1);
+        setTimeLeft((prev: number) => prev - 1);
       }, 1000);
     } else if (timeLeft === 0 && isRunning) {
       // Автоматическая остановка при истечении времени, но без перехода к следующему
       setIsRunning(false);
-      toast.info(timerMode === 'work' ? 'Подход завершен' : 'Отдых завершен');
+      toast.info('Подход завершен');
     }
 
     return () => clearInterval(interval);
-  }, [isRunning, timeLeft, timerMode]);
+  }, [isRunning, timeLeft]);
 
   // Автоматический сброс таймера на duration текущего упражнения при смене упражнения (если не запущен)
   useEffect(() => {
     if (!isRunning) {
       setTimeLeft(currentExercise?.duration || 30);
-      setTimerMode('work');
     }
   }, [currentExerciseIndex, isRunning, currentExercise?.duration]);
+
+  // Таймер для отдыха
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    
+    if (isRestRunning && restTimeLeft > 0) {
+      interval = setInterval(() => {
+        setRestTimeLeft((prev: number) => prev - 1);
+      }, 1000);
+    } else if (restTimeLeft === 0 && isRestRunning) {
+      setIsRestRunning(false);
+      toast.info('Отдых завершен');
+      setIsRestModalOpen(false);
+    }
+
+    return () => clearInterval(interval);
+  }, [isRestRunning, restTimeLeft]);
 
   const handleWorkoutComplete = async () => {
     const endTime = new Date();
@@ -136,12 +167,33 @@ export function TimerPage({ onNavigate, workout }: TimerPageProps) {
     setIsRunning(!isRunning);
   };
 
-  const setTimerPreset = (mode: 'work' | 'rest') => {
-    setTimerMode(mode);
-    const presetTime = mode === 'work'
-      ? currentExercise?.duration || 30
-      : currentExercise?.rest || 60;
-    setTimeLeft(presetTime);
+  const toggleRestTimer = () => {
+    if (!isRestRunning) {
+      setIsRestRunning(true);
+    } else {
+      setIsRestRunning(false);
+    }
+  };
+
+  const resetRestTimer = () => {
+    setIsRestRunning(false);
+    setRestTimeLeft(60);
+  };
+
+  const adjustRestTime = (delta: number) => {
+    setRestTimeLeft(prev => Math.max(0, prev + delta));
+  };
+
+  const completeRest = () => {
+    setIsRestRunning(false);
+    setIsRestModalOpen(false);
+    setRestTimeLeft(60);
+  };
+
+  const openRestModal = () => {
+    setRestTimeLeft(60);
+    setIsRestRunning(true);
+    setIsRestModalOpen(true);
   };
 
 
@@ -153,7 +205,7 @@ export function TimerPage({ onNavigate, workout }: TimerPageProps) {
       setCurrentExerciseIndex(prev => prev + 1);
       setCurrentSetIndex(0);
       if (currentExerciseIndex + 1 < totalExercises) {
-        setTimerPreset('work');
+        setTimeLeft(currentExercise?.duration || 30);
       } else {
         handleWorkoutComplete();
       }
@@ -161,7 +213,7 @@ export function TimerPage({ onNavigate, workout }: TimerPageProps) {
       // Следующий подход
       setCurrentSetIndex(prev => prev + 1);
       setCompletedSets(prev => prev + 1);
-      setTimerPreset('work');
+      setTimeLeft(currentExercise?.duration || 30);
     }
   };
 
@@ -169,12 +221,12 @@ export function TimerPage({ onNavigate, workout }: TimerPageProps) {
     if (currentExerciseIndex > 0) {
       const prevIndex = currentExerciseIndex - 1;
       const prevExercise = exercises[prevIndex];
-      const prevSets = (prevExercise as any)?.sets || 1;
+      const prevSets = (prevExercise as ExtendedExercise)?.sets || 1;
       setCompletedExercises(prev => Math.max(0, prev - 1));
       setCompletedSets(prev => Math.max(0, prev - prevSets));
       setCurrentExerciseIndex(prev => prev - 1);
       setCurrentSetIndex(0);
-      setTimerPreset('work');
+      setTimeLeft(exercises[prevIndex]?.duration || 30);
     }
   };
 
@@ -185,7 +237,7 @@ export function TimerPage({ onNavigate, workout }: TimerPageProps) {
     setCurrentExerciseIndex(nextIndex);
     setCurrentSetIndex(0);
     if (nextIndex < totalExercises) {
-      setTimerPreset('work');
+      setTimeLeft(currentExercise?.duration || 30);
     } else {
       handleWorkoutComplete();
     }
@@ -194,7 +246,6 @@ export function TimerPage({ onNavigate, workout }: TimerPageProps) {
   const resetTimer = () => {
     setIsRunning(false);
     setTimeLeft(currentExercise?.duration || 30);
-    setTimerMode('work');
   };
 
   const resetWorkout = () => {
@@ -202,7 +253,6 @@ export function TimerPage({ onNavigate, workout }: TimerPageProps) {
     setCurrentExerciseIndex(0);
     setCurrentSetIndex(0);
     setTimeLeft(exercises[0]?.duration || 30);
-    setTimerMode('work');
     setCompletedExercises(0);
     setCompletedSets(0);
     setWorkoutStartTime(null);
@@ -215,7 +265,7 @@ export function TimerPage({ onNavigate, workout }: TimerPageProps) {
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
-  const progress = totalSets > 0 ? (completedSets / totalSets) * 100 : 0;
+  const progress = currentSets > 0 ? (currentSetIndex / currentSets) * 100 : 0;
 
   // Проверяем, есть ли упражнения
   if (!exercises || exercises.length === 0) {
@@ -238,7 +288,11 @@ export function TimerPage({ onNavigate, workout }: TimerPageProps) {
 
   return (
     <div className="p-4 space-y-6 min-h-screen bg-gradient-to-b from-primary/5 to-background">
-      <div className="text-center mb-4">
+      <div className="flex items-center mb-4">
+        <Button variant="ghost" size="sm" onClick={() => onNavigate('home')} className="mr-4">
+          <ArrowLeft className="w-4 h-4 mr-2" />
+          Назад
+        </Button>
         <h1 className="text-2xl font-bold">
           {workout?.name || "Тренировка"}
         </h1>
@@ -274,61 +328,92 @@ export function TimerPage({ onNavigate, workout }: TimerPageProps) {
                 key={`${currentExercise.video}-${currentSetIndex}`} // Ключ для перезапуска видео на новом подходе
                 videoSrc={currentExercise.video}
                 exerciseName={currentExercise.name}
-                autoPlay={isRunning && timerMode === 'work'}
+                autoPlay={isRunning}
                 loop={true}
                 muted={true}
               />
             </div>
           )}
           
+
           {/* Информация о подходе */}
-          <div className="space-y-2 text-center">
-            {(currentExercise as any)?.reps && (
-              <p className="text-lg font-semibold">{(currentExercise as any).reps} повторений</p>
+          {/* <div className="space-y-2 text-center">
+            {currentExercise.reps && (
+              <p className="text-lg font-semibold">{currentExercise.reps} повторений</p>
             )}
-            {(currentExercise as any)?.weight && (
-              <p className="text-sm text-muted-foreground">Вес: {(currentExercise as any).weight} кг</p>
+            {currentExercise.weight && (
+              <p className="text-sm text-muted-foreground">Вес: {currentExercise.weight} кг</p>
             )}
-          </div>
+          </div> */}
         </CardContent>
       </Card>
+
+      {/* Модальное окно для отдыха */}
+      <Dialog open={isRestModalOpen} onOpenChange={setIsRestModalOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Отдых</DialogTitle>
+            <DialogDescription>Таймер отдыха</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="flex items-center gap-4 justify-center">
+
+              <Button onClick={() => adjustRestTime(-10)} variant="outline" size="lg" className="rounded-full w-12 h-12 shadow-lg">
+                <SquareMinus className="h-12 w-12" />
+              </Button>
+              <span className="text-6xl font-bold text-primary justify-center flex items-center">{formatTime(restTimeLeft)}</span>
+              <Button onClick={() => adjustRestTime(10)} variant="outline" size="lg" className="rounded-full w-12 h-12 shadow-lg">
+                <SquarePlus className="h-12 w-12" />
+              </Button>
+            </div>
+            <div className="flex justify-center mt-4">
+              <Button
+                onClick={completeRest}
+                variant="default"
+                size="lg"
+                className="w-full max-w-[200px]"
+              >
+                Завершить
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
       
       {/* Прогресс */}
       
       {/* Отдельный блок таймера */}
       <Card>
         <CardHeader className="text-center">
-          <CardTitle className="text-xl mb-2">
-            Таймер {timerMode === 'work' ? '(Подход)' : '(Отдых)'}
+          <CardTitle className="text-2xl mb-2">
+            Отведенное время для подхода
           </CardTitle>
-          <div className="flex justify-center gap-2 mb-4">
+          {/* <div className="flex justify-center gap-2 mb-4">
             <Button
               size="sm"
-              variant={timerMode === 'work' ? 'default' : 'outline'}
-              onClick={() => setTimerPreset('work')}
+              variant="default"
+              onClick={() => {
+                setTimeLeft(currentExercise?.duration || 30);
+              }}
             >
-              Подход ({currentExercise?.duration || 30}с)
+              Время подхода по плану ({currentExercise?.duration || 30}с)
             </Button>
-            <Button
-              size="sm"
-              variant={timerMode === 'rest' ? 'default' : 'outline'}
-              onClick={() => setTimerPreset('rest')}
-            >
-              Отдых ({currentExercise?.rest || 15}с)
-            </Button>
-          </div>
+          </div> */}
         </CardHeader>
         <CardContent className="flex flex-col items-center space-y-6">
           <div className="flex flex-col items-center gap-2">
             <span className="text-6xl font-bold text-primary h-20">{formatTime(timeLeft)}</span>
           </div>
           
-          <div className="flex gap-6">
+          <div className="flex gap-4 justify-center">
             <Button onClick={toggleTimer} size="lg" className="rounded-full w-16 h-16 shadow-lg">
               {isRunning ? <Pause className="h-6 w-6" /> : <Play className="h-6 w-6" />}
             </Button>
             <Button onClick={resetTimer} variant="outline" size="lg" className="rounded-full w-16 h-16 shadow-lg">
               <RotateCcw className="h-6 w-6" />
+            </Button>
+            <Button onClick={openRestModal} variant="outline" size="lg" className="rounded-full w-16 h-16 shadow-lg">
+              <MoonStar className="h-6 w-6" />
             </Button>
           </div>
         </CardContent>
@@ -339,7 +424,7 @@ export function TimerPage({ onNavigate, workout }: TimerPageProps) {
           <div className="space-y-2">
             <div className="flex justify-between text-sm">
               <span>Прогресс: Упражнение {currentExerciseIndex}/{totalExercises}</span>
-              <span>{completedSets}/{totalSets} подходов</span>
+              <span>{currentSetIndex}/{currentSets} подходов</span>
             </div>
             <Progress value={progress} className="h-2" />
           </div>
@@ -374,7 +459,7 @@ export function TimerPage({ onNavigate, workout }: TimerPageProps) {
                 onClick={nextSet}
                 size="sm"
                 className="w-full max-w-[200px]"
-                disabled={currentExerciseIndex >= totalExercises - 1 && isLastSet}
+                disabled={currentExerciseIndex >= totalExercises && isLastSet}
               >
                 {isLastSet ? 'Закончить упражнение' : 'Следующий подход'}
               </Button>

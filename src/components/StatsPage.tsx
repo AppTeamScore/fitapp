@@ -387,9 +387,10 @@ export function StatsPage({ onNavigate }: StatsPageProps) {
     <div className="p-4 space-y-6">
       {/* Заголовок */}
       <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-4">
-          <Button variant="ghost" size="sm" onClick={() => onNavigate('home')}>
-            <ArrowLeft className="w-4 h-4" />
+        <div className="flex items-center">
+          <Button variant="ghost" size="sm" onClick={() => onNavigate('home')} className="mr-4">
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Назад
           </Button>
           <h1 className="text-2xl font-bold">Статистика</h1>
         </div>
@@ -404,13 +405,13 @@ export function StatsPage({ onNavigate }: StatsPageProps) {
               <AlertDialogHeader>
                 <AlertDialogTitle>Очистить статистику?</AlertDialogTitle>
                 <AlertDialogDescription>
-                  Это действие безвозвратно удалит всю статистику тренировок. 
+                  Это действие безвозвратно удалит всю статистику тренировок.
                   Вы уверены, что хотите продолжить?
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
                 <AlertDialogCancel>Отмена</AlertDialogCancel>
-                <AlertDialogAction 
+                <AlertDialogAction
                   onClick={clearAllStats}
                   className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                   disabled={isClearing}

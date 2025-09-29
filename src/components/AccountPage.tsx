@@ -230,9 +230,10 @@ export function AccountPage({ onNavigate, onLogout, user }: AccountPageProps) {
     <div className="p-4 space-y-6">
       {/* Заголовок */}
       <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-4">
-          <Button variant="ghost" size="sm" onClick={() => onNavigate('home')}>
-            <ArrowLeft className="w-4 h-4" />
+        <div className="flex items-center">
+          <Button variant="ghost" size="sm" onClick={() => onNavigate('home')} className="mr-4">
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Назад
           </Button>
           <h1 className="text-2xl font-bold">Аккаунт</h1>
         </div>

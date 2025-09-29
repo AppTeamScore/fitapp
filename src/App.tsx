@@ -21,17 +21,26 @@ import { logger } from './utils/logger';
 
 export default function App() {
   const [currentPage, setCurrentPage] = useState<string>('loading');
+  const [pageStack, setPageStack] = useState<string[]>(['home']);
+  const [pendingPage, setPendingPage] = useState<string | null>(null);
   const [currentWorkout, setCurrentWorkout] = useState<Workout | null>(null);
   const [user, setUser] = useState<any>(null);
   const [needsOnboarding, setNeedsOnboarding] = useState(false);
 
   useEffect(() => {
     logger.startFunction('App initialization');
-    checkAuth();
+    const savedPage = localStorage.getItem('currentPage') || undefined;
+    checkAuth(savedPage);
     logger.endFunction('App initialization');
   }, []);
 
-  const checkAuth = async () => {
+  useEffect(() => {
+    if (currentPage !== 'loading') {
+      window.scrollTo(0, 0);
+    }
+  }, [currentPage]);
+
+  const checkAuth = async (savedPage?: string) => {
     logger.startFunction('checkAuth');
     try {
       const { data: { session } } = await supabase.auth.getSession();
@@ -39,20 +48,22 @@ export default function App() {
       if (session?.user) {
         logger.info('Пользователь авторизован', { userId: session.user.id });
         setUser(session.user);
-        await checkOnboardingStatus(session.access_token);
+        await checkOnboardingStatus(session.access_token, savedPage);
       } else {
         logger.info('Пользователь не авторизован, переход на страницу авторизации');
         setCurrentPage('auth');
+        localStorage.removeItem('currentPage');
       }
     } catch (error) {
       logger.error('Ошибка проверки авторизации', error as Error);
       setCurrentPage('auth');
+      localStorage.removeItem('currentPage');
     } finally {
       logger.endFunction('checkAuth');
     }
   };
 
-  const checkOnboardingStatus = async (accessToken: string) => {
+  const checkOnboardingStatus = async (accessToken: string, savedPage?: string) => {
     logger.startFunction('checkOnboardingStatus', { accessToken: '***' });
     try {
       const response = await fetch(`https://${projectId}.supabase.co/functions/v1/make-server-c6c9ad1a/profile`, {
@@ -65,17 +76,29 @@ export default function App() {
       
       if (response.ok && result.profile?.onboardingCompleted) {
         logger.info('Онбординг завершен, переход на главную страницу');
-        setCurrentPage('home');
+        const targetPage = savedPage && ['workouts', 'plan', 'calendar', 'exercises', 'stats', 'account', 'timer'].includes(savedPage)
+          ? savedPage
+          : 'home';
+        setCurrentPage(targetPage);
+        localStorage.setItem('currentPage', targetPage);
+        // Восстанавливаем стек если нужно, но для простоты сбрасываем на текущую
+        setPageStack([targetPage]);
       } else {
         logger.info('Требуется онбординг', { hasProfile: !!result.profile });
         setNeedsOnboarding(true);
         setCurrentPage('onboarding');
+        localStorage.removeItem('currentPage');
       }
     } catch (error) {
       logger.error('Ошибка проверки онбординга', error as Error);
       // Если сервер недоступен, все равно позволяем войти в приложение
       logger.warn('Сервер недоступен, разрешаем вход без онбординга');
-      setCurrentPage('home');
+      const targetPage = savedPage && ['workouts', 'plan', 'calendar', 'exercises', 'stats', 'account', 'timer'].includes(savedPage)
+        ? savedPage
+        : 'home';
+      setCurrentPage(targetPage);
+      localStorage.setItem('currentPage', targetPage);
+      setPageStack([targetPage]);
     } finally {
       logger.endFunction('checkOnboardingStatus');
     }
@@ -110,7 +133,38 @@ export default function App() {
   const handleNavigate = (page: string) => {
     logger.logUserAction('Навигация', { fromPage: currentPage, toPage: page });
     logger.logAppState(`Переход на страницу: ${page}`, { previousPage: currentPage });
-    setCurrentPage(page);
+    
+    if (page === 'back') {
+      // Навигация назад
+      if (pageStack.length > 1) {
+        const newStack = pageStack.slice(0, -1);
+        const newPage = newStack[newStack.length - 1];
+        setPageStack(newStack);
+        setPendingPage(newPage);
+        setTimeout(() => {
+          setCurrentPage(newPage);
+          localStorage.setItem('currentPage', newPage);
+          setPendingPage(null);
+        }, 300);
+      } else {
+        const homePage = 'home';
+        setPendingPage(homePage);
+        setTimeout(() => {
+          setCurrentPage(homePage);
+          localStorage.setItem('currentPage', homePage);
+          setPendingPage(null);
+        }, 300);
+      }
+    } else {
+      // Обычная навигация
+      setPageStack(prev => [...prev, page]);
+      setPendingPage(page);
+      setTimeout(() => {
+        setCurrentPage(page);
+        localStorage.setItem('currentPage', page);
+        setPendingPage(null);
+      }, 300);
+    }
   };
 
   const handleStartWorkout = (workout: Workout) => {
@@ -134,6 +188,10 @@ export default function App() {
   };
 
   const renderCurrentPage = () => {
+    if (pendingPage) {
+      return <LoadingSpinner message="Загрузка страницы..." />;
+    }
+
     switch (currentPage) {
       case 'loading':
         return <LoadingSpinner message="Загрузка приложения..." />;
@@ -159,7 +217,7 @@ export default function App() {
               <p className="text-muted-foreground mb-4">
                 Пожалуйста, выберите тренировку для начала.
               </p>
-              <button 
+              <button
                 onClick={() => handleNavigate('home')}
                 className="px-4 py-2 bg-primary text-primary-foreground rounded-md"
               >
@@ -183,6 +241,24 @@ export default function App() {
 
   const showBottomNav = ['home', 'workouts', 'calendar', 'stats', 'account'].includes(currentPage);
   const showWithPadding = showBottomNav && currentPage !== 'timer';
+
+  // Сохранение стека в localStorage для восстановления
+  useEffect(() => {
+    if (currentPage !== 'loading' && currentPage !== 'auth' && currentPage !== 'onboarding') {
+      localStorage.setItem('pageStack', JSON.stringify(pageStack));
+    }
+  }, [pageStack]);
+
+  // Восстановление стека при инициализации (после авторизации)
+  useEffect(() => {
+    const savedStack = localStorage.getItem('pageStack');
+    if (savedStack && user) {
+      const parsedStack = JSON.parse(savedStack);
+      if (parsedStack.length > 0 && parsedStack[parsedStack.length - 1] === currentPage) {
+        setPageStack(parsedStack);
+      }
+    }
+  }, [user, currentPage]);
 
   return (
     <ErrorBoundary>

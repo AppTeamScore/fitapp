@@ -72,13 +72,13 @@ ${availableExercisesList}
           "name": "Название упражнения",
           "sets": 3,
           "reps": "10-12",
-          "duration": 30
+          "duration": 60
         }
       ],
       "totalDuration": 45
     }
   ],
-  "recommendations": "Общие рекомендации учитывая все данные пользователя (возраст, вес, цели, ограничения и т.д.)."
+  "recommendations": "Общие рекомендации для пользователя, учитывая все его данные (возраст, вес, цели, ограничения и т.д.)."
 }`;
 
   console.log('Будет создан план по следующим данным:', 'Данные получены, обрабатываю.'); // Отладка статуса
@@ -93,7 +93,7 @@ ${availableExercisesList}
         'X-Title': 'FitApp',
       },
       body: JSON.stringify({
-        model: "deepseek/deepseek-chat-v3.1:free", // Ебалан, модель не меняй
+        model: "z-ai/glm-4.5-air:free", // Ебалан, модель не меняй
         messages: [
           {
             role: "system",
@@ -104,7 +104,7 @@ ${availableExercisesList}
             content: prompt
           }
         ],
-        temperature: 0.3,
+        temperature: 0.5,
         response_format: { "type": "json_object" },
       }),
     });

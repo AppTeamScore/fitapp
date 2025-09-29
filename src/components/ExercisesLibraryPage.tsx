@@ -56,11 +56,12 @@ export function ExercisesLibraryPage({ onNavigate, onStartWorkout }: ExercisesLi
 
   return (
     <div className="p-4 space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Библиотека упражнений</h1>
-        <Button onClick={() => onNavigate('home')} variant="ghost">
+      <div className="flex items-center">
+        <Button onClick={() => onNavigate('home')} variant="ghost" size="sm" className="mr-4">
+          <ArrowLeft className="w-4 h-4 mr-2" />
           Назад
         </Button>
+        <h1 className="text-2xl font-bold">Библиотека упражнений</h1>
       </div>
 
       {/* Поиск */}
