@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Play, Pause, RotateCcw, SkipForward, Info, ArrowLeft, MoonStar, SquareMinus, SquarePlus} from "lucide-react";
+import { Play, Pause, RotateCcw, SkipForward, Info, ArrowLeft, MoonStar, SquareMinus, SquarePlus, Square } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "./ui/dialog";
 import { Button } from "./ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
@@ -121,9 +121,9 @@ export function TimerPage({ onNavigate, workout }: TimerPageProps) {
       const gainNode = audioContext.createGain();
       oscillator.connect(gainNode);
       gainNode.connect(audioContext.destination);
-      oscillator.frequency.value = 850;
+      oscillator.frequency.value = 800;
       oscillator.type = 'sine';
-      gainNode.gain.setValueAtTime(0.5, audioContext.currentTime);
+      gainNode.gain.setValueAtTime(0.7, audioContext.currentTime);
       gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 1.0);
       oscillator.start(audioContext.currentTime);
       oscillator.stop(audioContext.currentTime + 1.0);
@@ -209,6 +209,7 @@ export function TimerPage({ onNavigate, workout }: TimerPageProps) {
   };
 
   const openRestModal = () => {
+    resetTimer();
     setRestTimeLeft(60);
     setIsRestRunning(true);
     setIsRestModalOpen(true);
@@ -425,11 +426,11 @@ export function TimerPage({ onNavigate, workout }: TimerPageProps) {
           
           <div className="flex gap-4 justify-center">
             <Button onClick={toggleTimer} size="lg" className="rounded-full w-16 h-16 shadow-lg">
-              {isRunning ? <Pause className="h-6 w-6" /> : <Play className="h-6 w-6" />}
+              {isRunning ? <Square className="h-6 w-6" /> : <Play className="h-6 w-6" />}
             </Button>
-            <Button onClick={resetTimer} variant="outline" size="lg" className="rounded-full w-16 h-16 shadow-lg">
+            {/* <Button onClick={resetTimer} variant="outline" size="lg" className="rounded-full w-16 h-16 shadow-lg">
               <RotateCcw className="h-6 w-6" />
-            </Button>
+            </Button> */}
             <Button onClick={openRestModal} variant="outline" size="lg" className="rounded-full w-16 h-16 shadow-lg">
               <MoonStar className="h-6 w-6" />
             </Button>
