@@ -104,9 +104,9 @@ export function VideoPlayer({
   }
 
   return (
-    <Card className="w-full overflow-hidden">
+    <Card className="w-full max-w-xl mx-auto overflow-hidden">
       <CardContent className="p-0">
-        <div className="relative bg-black">
+        <div className="relative bg-white">
           {isLoading && (
             <div className="absolute inset-0 flex items-center justify-center bg-muted">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
@@ -115,7 +115,7 @@ export function VideoPlayer({
           
           <video
             ref={videoRef}
-            className="w-full aspect-[9/16] object-contain"
+            className="w-full aspect-video object-contain"
             loop={loop}
             muted={isMuted}
             playsInline
@@ -130,14 +130,14 @@ export function VideoPlayer({
           </video>
 
           {/* Контролы */}
-          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-4">
-            <div className="flex items-center justify-between text-white">
+          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-gray-800/60 to-transparent p-4">
+            <div className="flex items-center justify-between text-gray-900">
               <div className="flex items-center space-x-2">
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={togglePlay}
-                  className="text-white hover:text-white hover:bg-white/20 h-8 w-8 p-0"
+                  className="text-gray-900 hover:text-gray-900 hover:bg-gray-200/50 h-8 w-8 p-0"
                 >
                   {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
                 </Button>
@@ -146,7 +146,7 @@ export function VideoPlayer({
                   variant="ghost"
                   size="sm"
                   onClick={restartVideo}
-                  className="text-white hover:text-white hover:bg-white/20 h-8 w-8 p-0"
+                  className="text-gray-900 hover:text-gray-900 hover:bg-gray-200/50 h-8 w-8 p-0"
                 >
                   <RotateCcw className="h-4 w-4" />
                 </Button>
@@ -156,7 +156,7 @@ export function VideoPlayer({
                 variant="ghost"
                 size="sm"
                 onClick={toggleMute}
-                className="text-white hover:text-white hover:bg-white/20 h-8 w-8 p-0"
+                className="text-gray-900 hover:text-gray-900 hover:bg-gray-200/50 h-8 w-8 p-0"
               >
                 {isMuted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
               </Button>
