@@ -261,8 +261,8 @@ export function TimerPage({ onNavigate, workout }: TimerPageProps) {
       setCurrentExerciseIndex(nextIndex);
       setCurrentSetIndex(0);
       setTimeLeft(currentExercise?.duration || 30);
-    } else {
-      handleWorkoutComplete();
+    // } else {
+    //   handleWorkoutComplete();
     }
   };
 
@@ -446,8 +446,8 @@ export function TimerPage({ onNavigate, workout }: TimerPageProps) {
         <CardContent className="p-4">
           <div className="space-y-2">
             <div className="flex justify-between text-sm">
-              <span>Прогресс: Упражнение {currentExerciseIndex + 1}/{totalExercises}</span>
-              <span>{currentSetIndex}/{currentSets} подходов</span>
+              <span>Упражнение {currentExerciseIndex + 1}/{totalExercises}</span>
+              {currentSets > 1 && <span>Выполнено: {currentSetIndex}/{currentSets} подходов</span>}
             </div>
             <Progress value={progress} className="h-2" />
           </div>
@@ -473,8 +473,9 @@ export function TimerPage({ onNavigate, workout }: TimerPageProps) {
                 variant="outline"
                 size="sm"
                 className="flex-1 min-w-[100px]"
+                disabled={currentExerciseIndex + 1 === totalExercises}
               >
-                Пропустить →
+                Следующее →
               </Button>
             </div>
             <div className="flex justify-center">

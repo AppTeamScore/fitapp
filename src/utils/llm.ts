@@ -1,7 +1,7 @@
 import { exercises } from '../data/exercises';
+import { getOpenRouterConfig } from './env';
 
-const OPENROUTER_API_KEY = "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";
-const OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1";
+const config = getOpenRouterConfig();
 
 interface WorkoutPlan {
   weekPlan: Array<{
@@ -23,7 +23,7 @@ export async function generateWorkoutPlan(userProfile: any): Promise<WorkoutPlan
   const limitedExercises = exercises.slice(0, 20);
   const availableExercisesList = limitedExercises.map(ex => `- ${ex.name} (${ex.category}, ${ex.difficulty})`).join('\n');
 
-  const prompt = `Создай продуманный и персонализированный план тренировок на основе следующих данных пользователя. ВЫВОДИ ТОЛЬКО JSON, НИЧЕГО ДРУГОГО! Не добавляй объяснения или текст вне JSON.
+  const prompt = `Создай продуманный и персонализированный план тренировок на основе следующих данных пользователя и его пожелайний. ВЫВОДИ ТОЛЬКО JSON, НИЧЕГО ДРУГОГО! Не добавляй объяснения или текст вне JSON.
 
 Персональные данные:
 Возраст: ${userProfile.age || 'Не указано'}
@@ -78,17 +78,18 @@ ${availableExercisesList}
       "totalDuration": 45
     }
   ],
-  "recommendations": "Расширенные рекомендации для пользователя, учитывая все данные (возраст, вес, цели, ограничения и т.д.) и пожелания. Так же добавь рекомендаций лично от себя."
+  "recommendations": "Расширенные и глубокие рекомендации для пользователя, учитывая все данные (возраст, вес, цели, ограничения и т.д.) и пожелания. Так же добавь рекомендаций лично от себя. 
+  рекомендации должны основаны на данных пользователя, пожеланиях и созданом тобой плане."
 }`;
 
   console.log('Будет создан план по следующим данным:', 'Данные получены, обрабатываю.'); // Отладка статуса
 
   try {
-    const response = await fetch(`${OPENROUTER_BASE_URL}/chat/completions`, {
+    const response = await fetch(`${config.baseUrl}/chat/completions`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
+        'Authorization': `Bearer ${config.apiKey}`,
         'HTTP-Referer': 'http://localhost:5173',
         'X-Title': 'FitApp',
       },
@@ -97,14 +98,14 @@ ${availableExercisesList}
         messages: [
           {
             role: "system",
-            content: "Ты помощник по фитнесу. Всегда отвечай ТОЛЬКО валидным в формате JSON без дополнительного текста."
+            content: "Ты профессиональный тренер по фитнесу. Твоя задача создать правильный и продуманный план тренировок."
           },
           {
             role: "user",
             content: prompt
           }
         ],
-        temperature: 0.5,
+        temperature: 0.3,
         response_format: { "type": "json_object" },
       }),
     });

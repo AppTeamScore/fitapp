@@ -229,7 +229,8 @@ export function WorkoutPlanPage({ onNavigate, onStartWorkout }: WorkoutPlanPageP
 
   if (!planData) {
     return (
-      <div className="min-h-screen p-4 bg-background">
+      <>
+        <div className="min-h-screen p-4 bg-background">
         <div className="max-w-4xl mx-auto">
           <div className="flex items-center mb-6">
             <Button 
@@ -287,11 +288,24 @@ export function WorkoutPlanPage({ onNavigate, onStartWorkout }: WorkoutPlanPageP
           </Card>
         </div>
       </div>
-    );
+      {/* {isGenerating && (
+        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/30 backdrop-blur-sm p-4 space-y-6">
+          <RefreshCw className="h-16 w-16 animate-spin text-primary drop-shadow-2xl" />
+          <div className="text-center space-y-2">
+            <p className="text-lg text-white/90 drop-shadow-md">Создаю пернольный план</p>
+          </div>
+          <div className="w-64 bg-white/20 backdrop-blur-sm rounded-full h-2">
+            <div className="bg-primary h-2 rounded-full w-[70%] animate-pulse"></div>
+          </div>
+        </div>
+      )} */}
+    </>
+  );
   }
 
   return (
-    <div className="min-h-screen p-4 bg-background">
+    <>
+      <div className="min-h-screen p-4 bg-background">
       <div className="max-w-4xl mx-auto">
         <div className="mb-6">
           <div className="flex items-center mb-4">
@@ -485,5 +499,17 @@ export function WorkoutPlanPage({ onNavigate, onStartWorkout }: WorkoutPlanPageP
         )}
       </div>
     </div>
-  );
+    {isGenerating && (
+        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/30 backdrop-blur-sm p-4 space-y-6">
+          <RefreshCw className="h-16 w-16 animate-spin text-primary drop-shadow-2xl" />
+          <div className="text-center space-y-2">
+            <p className="text-lg text-white/90 drop-shadow-md">Создаю персональный план</p>
+          </div>
+          <div className="w-64 bg-white/20 backdrop-blur-sm rounded-full h-2">
+            <div className="bg-primary h-2 rounded-full w-[70%] animate-pulse"></div>
+          </div>
+        </div>
+      )}
+  </>
+);
 }

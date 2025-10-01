@@ -51,7 +51,7 @@ export const exercises: Exercise[] = [
   { id: "video_077", name: "Тяга кабеля сидя в блоке", video: "video_077.mp4", duration: 45, rest: 20, category: "Сила", difficulty: "Средне", muscleGroups: ["Спина"] },
   { id: "video_081", name: "Жим гантелей 'Арнольд'", video: "video_081.mp4", duration: 45, rest: 25, category: "Сила", difficulty: "Средне", muscleGroups: ["Плечи"], hasWeight: true },
   { id: "video_085", name: "Отведение гантелей назад в наклоне", video: "video_085.mp4", duration: 40, rest: 20, category: "Сила", difficulty: "Средне", muscleGroups: ["Плечи"], hasWeight: true },
-  { id: "video_086", name: "Жим штанги лежа", video: "video_086.mp4", duration: 45, rest: 30, category: "Сила", difficulty: "Сложно", muscleGroups: ["Грудь", "Трицепс"], hasWeight: true },
+  { id: "video_096", name: "Жим штанги лежа", video: "video_096.mp4", duration: 60, rest: 60, category: "Сила", difficulty: "Сложно", muscleGroups: ["Грудь", "Трицепс"], hasWeight: true },
   { id: "video_087", name: "Отжимания на брусьях с пола", video: "video_087.mp4", duration: 30, rest: 20, category: "Сила", difficulty: "Сложно", muscleGroups: ["Трицепс", "Грудь"] },
   { id: "video_093", name: "Отжимания на наклонной поверхности", video: "video_093.mp4", duration: 30, rest: 15, category: "Сила", difficulty: "Легко", muscleGroups: ["Грудь", "Трицепс"] },
   { id: "video_095", name: "Обратный сгиб запястья с гантелью", video: "video_095.mp4", duration: 30, rest: 15, category: "Сила", difficulty: "Легко", muscleGroups: ["Предплечья"], hasWeight: true },
