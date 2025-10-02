@@ -202,6 +202,10 @@ export function TimerPage({ onNavigate, workout }: TimerPageProps) {
     setRestTimeLeft(prev => Math.max(0, prev + delta));
   };
 
+  const adjusTimerLeft = (delta: number) => {
+    setTimeLeft(prev => Math.max(0, prev + delta));
+  };
+
   const completeRest = () => {
     setIsRestRunning(false);
     setIsRestModalOpen(false);
@@ -228,7 +232,9 @@ export function TimerPage({ onNavigate, workout }: TimerPageProps) {
         setCurrentSetIndex(0);
         setTimeLeft(currentExercise?.duration || 30);
       } else {
-        handleWorkoutComplete();
+        if (totalExercises != 1){
+          handleWorkoutComplete();
+        }
       }
     } else {
       // Следующий подход
@@ -288,7 +294,7 @@ export function TimerPage({ onNavigate, workout }: TimerPageProps) {
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
-  const progress = currentSets > 0 ? (currentSetIndex / currentSets) * 100 : 0;
+  const progress = currentSets > 0 ? ((currentSetIndex + 1) / currentSets) * 100 : 0;
 
   // Проверяем, есть ли упражнения
   if (!exercises || exercises.length === 0) {
@@ -380,7 +386,6 @@ export function TimerPage({ onNavigate, workout }: TimerPageProps) {
           </DialogHeader>
           <div className="space-y-4">
             <div className="flex items-center gap-4 justify-center">
-
               <Button onClick={() => adjustRestTime(-10)} variant="outline" size="lg" className="rounded-full w-12 h-12 shadow-lg">
                 <SquareMinus className="h-12 w-12" />
               </Button>
@@ -408,8 +413,8 @@ export function TimerPage({ onNavigate, workout }: TimerPageProps) {
       {/* Отдельный блок таймера */}
       <Card>
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl mb-2">
-            Отведенное время для подхода
+          <CardTitle className="text-2xl mb-1">
+            Время подхода
           </CardTitle>
           {/* <div className="flex justify-center gap-2 mb-4">
             <Button
@@ -424,8 +429,14 @@ export function TimerPage({ onNavigate, workout }: TimerPageProps) {
           </div> */}
         </CardHeader>
         <CardContent className="flex flex-col items-center space-y-6">
-          <div className="flex flex-col items-center gap-2">
-            <span className="text-6xl font-bold text-primary h-20">{formatTime(timeLeft)}</span>
+          <div className="flex items-center gap-6 justify-center">
+              <Button onClick={() => adjusTimerLeft(-10)} variant="outline" size="lg" className="rounded-full w-12 h-12 shadow-lg">
+                <SquareMinus className="h-12 w-12" />
+              </Button>
+              <span className="text-6xl font-bold text-primary justify-center flex items-center">{formatTime(timeLeft)}</span>
+              <Button onClick={() => adjusTimerLeft(10)} variant="outline" size="lg" className="rounded-full w-12 h-12 shadow-lg">
+                <SquarePlus className="h-12 w-12" />
+              </Button>
           </div>
           
           <div className="flex gap-4 justify-center">
@@ -442,89 +453,95 @@ export function TimerPage({ onNavigate, workout }: TimerPageProps) {
         </CardContent>
       </Card>
 
-      <Card>
-        <CardContent className="p-4">
-          <div className="space-y-2">
-            <div className="flex justify-between text-sm">
-              <span>Упражнение {currentExerciseIndex + 1}/{totalExercises}</span>
-              {currentSets > 1 && <span>Выполнено: {currentSetIndex}/{currentSets} подходов</span>}
+      {totalExercises > 1 && (
+        <Card>
+          <CardContent className="p-4">
+            <div className="space-y-2">
+              <div className="flex justify-between text-sm">
+                <span>Упражнение: {currentExerciseIndex + 1}/{totalExercises}</span>
+                {currentSets > 1 && <span>Подход: {currentSetIndex + 1}/{currentSets}</span>}
+              </div>
+              <Progress value={progress} className="h-2" />
             </div>
-            <Progress value={progress} className="h-2" />
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Навигация по упражнениям */}
-      <Card>
-        <CardContent className="p-4">
-          <div className="flex flex-col gap-4">
-            <div className="flex gap-2 justify-center">
-              <Button
-                onClick={previousExercise}
-                variant="outline"
-                size="sm"
-                className="flex-1 min-w-[100px]"
-                disabled={currentExerciseIndex === 0}
-              >
-                ← Предыдущее
-              </Button>
-              <Button
-                onClick={skipCurrent}
-                variant="outline"
-                size="sm"
-                className="flex-1 min-w-[100px]"
-                disabled={currentExerciseIndex + 1 === totalExercises}
-              >
-                Следующее →
-              </Button>
-            </div>
-            <div className="flex justify-center">
-              <Button
-                onClick={nextSet}
-                size="sm"
-                className="w-full max-w-[200px]"
-                disabled={currentExerciseIndex >= totalExercises && isLastSet}
-              >
-                {isLastSet ? 'Закончить упражнение' : 'Следующий подход'}
-              </Button>
-            </div>
-            {completedExercises > 0 && (
-              <div className="flex justify-center">
+      {totalExercises > 1 && (
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex flex-col gap-4">
+              <div className="flex gap-2 justify-center">
                 <Button
-                  onClick={resetWorkout}
+                  onClick={previousExercise}
                   variant="outline"
                   size="sm"
-                  className="w-full max-w-[200px]"
+                  className="flex-1 min-w-[100px]"
+                  disabled={currentExerciseIndex === 0}
                 >
-                  Сбросить тренировку
+                  ← Предыдущее
+                </Button>
+                <Button
+                  onClick={skipCurrent}
+                  variant="outline"
+                  size="sm"
+                  className="flex-1 min-w-[100px]"
+                  disabled={currentExerciseIndex + 1 === totalExercises}
+                >
+                  Следующее →
                 </Button>
               </div>
-            )}
-          </div>
-        </CardContent>
-      </Card>
+              <div className="flex justify-center">
+                <Button
+                  onClick={nextSet}
+                  size="sm"
+                  className="w-full max-w-[200px]"
+                  disabled={currentExerciseIndex >= totalExercises && isLastSet}
+                >
+                  {isLastSet ? 'Закончить упражнение' : 'Следующий подход'}
+                </Button>
+              </div>
+              {completedExercises > 0 && (
+                <div className="flex justify-center">
+                  <Button
+                    onClick={resetWorkout}
+                    variant="outline"
+                    size="sm"
+                    className="w-full max-w-[200px]"
+                  >
+                    Сбросить тренировку
+                  </Button>
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       
       {/* Кнопки отмены и завершения */}
-      <div className="flex flex-col gap-4">
-        <Button
-          onClick={() => onNavigate('home')}
-          variant="outline"
-          size="lg"
-          className="w-full h-12"
-        >
-          Отменить тренировку
-        </Button>
-        <Button
-          onClick={handleWorkoutComplete}
-          variant="default"
-          size="lg"
-          className="w-full h-12 font-semibold"
-        >
-          Завершить тренировку
-        </Button>
+        <div className="flex flex-col gap-4">
+          <Button
+            onClick={() => onNavigate('home')}
+            variant="outline"
+            size="lg"
+            className="w-full h-12"
+          >
+            Отменить тренировку
+          </Button>
+        {totalExercises > 1 && (
+          <Button
+            onClick={handleWorkoutComplete}
+            variant="default"
+            size="lg"
+            className="w-full h-12 font-semibold"
+          >
+            Завершить тренировку
+          </Button>
+        )}
+        </div>
       </div>
-    </div>
   );
 
 }

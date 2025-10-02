@@ -3,7 +3,7 @@ import { Button } from './ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Badge } from './ui/badge';
 import { Separator } from './ui/separator';
-import { ArrowLeft, RefreshCw, Edit3, Play, CheckCircle, Clock, Target, Users, Trash2, Edit } from 'lucide-react';
+import { ArrowLeft, RefreshCw, Edit3, Play, CheckCircle, Clock, Target, Users, Trash2, Edit, LoaderCircle} from 'lucide-react';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from './ui/alert-dialog';
 import { toast } from 'sonner@2.0.3';
 import { projectId, publicAnonKey } from '../utils/supabase/info';
@@ -501,12 +501,12 @@ export function WorkoutPlanPage({ onNavigate, onStartWorkout }: WorkoutPlanPageP
     </div>
     {isGenerating && (
         <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/30 backdrop-blur-sm p-4 space-y-6">
-          <RefreshCw className="h-16 w-16 animate-spin text-primary drop-shadow-2xl" />
+          <LoaderCircle className="h-16 w-16 animate-spin text-primary drop-shadow-2xl" />
           <div className="text-center space-y-2">
-            <p className="text-lg text-white/90 drop-shadow-md">Создаю персональный план</p>
+            <p className="text-lg text-white/90 drop-shadow-md">Идет создание нового плана тренировок</p>
           </div>
           <div className="w-64 bg-white/20 backdrop-blur-sm rounded-full h-2">
-            <div className="bg-primary h-2 rounded-full w-[70%] animate-pulse"></div>
+            <div className="bg-primary h-2 rounded-full w-[90%] animate-pulse"></div>
           </div>
         </div>
       )}

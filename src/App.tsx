@@ -188,9 +188,9 @@ export default function App() {
   };
 
   const renderCurrentPage = () => {
-    if (pendingPage) {
-      return <LoadingSpinner message="Загрузка страницы..." />;
-    }
+    // if (pendingPage) {
+    //   return <LoadingSpinner message="Загрузка страницы..." />;
+    // }
 
     switch (currentPage) {
       case 'loading':
