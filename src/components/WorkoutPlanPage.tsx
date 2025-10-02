@@ -272,7 +272,7 @@ export function WorkoutPlanPage({ onNavigate, onStartWorkout }: WorkoutPlanPageP
                     ) : (
                       <>
                         <Target className="w-4 h-4 mr-2" />
-                        Автоматический план
+                        Автоматическое создание плана
                       </>
                     )}
                   </Button>
@@ -438,7 +438,7 @@ export function WorkoutPlanPage({ onNavigate, onStartWorkout }: WorkoutPlanPageP
                       <CardTitle className="text-lg">{dayWorkout.day}</CardTitle>
                       <Badge variant="secondary" className="text-xs">
                         <Clock className="w-3 h-3 mr-1" />
-                        {dayWorkout.totalDuration} мин
+                        Продолжительность ≈ {dayWorkout.totalDuration} мин
                       </Badge>
                     </div>
                     <p className="text-sm text-muted-foreground">{dayWorkout.workoutName}</p>

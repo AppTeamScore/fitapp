@@ -7,6 +7,9 @@ import { Label } from './ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { Separator } from './ui/separator';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from './ui/alert-dialog';
+import { RadioGroup, RadioGroupItem } from './ui/radio-group';
+import { Checkbox } from './ui/checkbox';
+import { Textarea } from './ui/textarea';
 import { toast } from 'sonner@2.0.3';
 import { supabase } from '../utils/supabase/client';
 import { projectId } from '../utils/supabase/info';
@@ -23,14 +26,21 @@ interface UserProfile {
   age: number;
   height: number;
   weight: number;
+  gender: string;
+  targetWeight?: number;
   primaryGoal: string;
+  specificGoals?: string[];
   fitnessLevel: string;
   workoutFrequency: string;
   workoutDuration: string;
   injuries?: string;
   limitations?: string;
   preferredWorkoutTypes?: string[];
+  equipment?: string[];
   availableDays?: string[];
+  preferredTime?: string;
+  onboardingCompleted?: boolean;
+  completedAt?: string;
 }
 
 export function AccountPage({ onNavigate, onLogout, user }: AccountPageProps) {
@@ -73,8 +83,16 @@ export function AccountPage({ onNavigate, onLogout, user }: AccountPageProps) {
 
       if (response.ok) {
         const result = await response.json();
-        setProfile(result.profile);
-        setEditedProfile(result.profile);
+        // Преобразуем строки в числа для согласованности
+        const normalizedProfile = {
+          ...result.profile,
+          age: result.profile.age ? parseInt(result.profile.age) : undefined,
+          height: result.profile.height ? parseInt(result.profile.height) : undefined,
+          weight: result.profile.weight ? parseInt(result.profile.weight) : undefined,
+          targetWeight: result.profile.targetWeight ? parseInt(result.profile.targetWeight) : undefined,
+        };
+        setProfile(normalizedProfile);
+        setEditedProfile(normalizedProfile);
       } else {
         toast.error('Ошибка загрузки профиля');
       }
@@ -109,8 +127,16 @@ export function AccountPage({ onNavigate, onLogout, user }: AccountPageProps) {
 
       if (response.ok) {
         const result = await response.json();
-        setProfile(result.profile);
-        setEditedProfile(result.profile);
+        // Преобразуем строки в числа для согласованности
+        const normalizedProfile = {
+          ...result.profile,
+          age: result.profile.age ? parseInt(result.profile.age) : undefined,
+          height: result.profile.height ? parseInt(result.profile.height) : undefined,
+          weight: result.profile.weight ? parseInt(result.profile.weight) : undefined,
+          targetWeight: result.profile.targetWeight ? parseInt(result.profile.targetWeight) : undefined,
+        };
+        setProfile(normalizedProfile);
+        setEditedProfile(normalizedProfile);
         setIsEditing(false);
         toast.success('Профиль обновлен!');
       } else {
@@ -207,6 +233,10 @@ export function AccountPage({ onNavigate, onLogout, user }: AccountPageProps) {
 
   const updateEditedProfile = (field: string, value: any) => {
     if (!editedProfile) return;
+    // Парсим числа
+    if (['age', 'height', 'weight', 'targetWeight'].includes(field)) {
+      value = value ? parseInt(value) : undefined;
+    }
     setEditedProfile({
       ...editedProfile,
       [field]: value
@@ -297,7 +327,7 @@ export function AccountPage({ onNavigate, onLogout, user }: AccountPageProps) {
                   <Input
                     type="number"
                     value={editedProfile.age || ''}
-                    onChange={(e) => updateEditedProfile('age', parseInt(e.target.value))}
+                    onChange={(e) => updateEditedProfile('age', e.target.value)}
                     placeholder="25"
                   />
                 </div>
@@ -306,7 +336,7 @@ export function AccountPage({ onNavigate, onLogout, user }: AccountPageProps) {
                   <Input
                     type="number"
                     value={editedProfile.height || ''}
-                    onChange={(e) => updateEditedProfile('height', parseInt(e.target.value))}
+                    onChange={(e) => updateEditedProfile('height', e.target.value)}
                     placeholder="175"
                   />
                 </div>
@@ -315,11 +345,40 @@ export function AccountPage({ onNavigate, onLogout, user }: AccountPageProps) {
                   <Input
                     type="number"
                     value={editedProfile.weight || ''}
-                    onChange={(e) => updateEditedProfile('weight', parseInt(e.target.value))}
+                    onChange={(e) => updateEditedProfile('weight', e.target.value)}
                     placeholder="70"
                   />
                 </div>
               </div>
+
+              <div className="space-y-2">
+                <Label>Пол</Label>
+                <RadioGroup
+                  value={editedProfile.gender || ''}
+                  onValueChange={(value) => updateEditedProfile('gender', value)}
+                >
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="male" id="male-edit" />
+                    <Label htmlFor="male-edit">Мужской</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="female" id="female-edit" />
+                    <Label htmlFor="female-edit">Женский</Label>
+                  </div>
+                </RadioGroup>
+              </div>
+
+              {editedProfile.primaryGoal === 'снижение-веса' && (
+                <div className="space-y-2">
+                  <Label>Целевой вес (кг)</Label>
+                  <Input
+                    type="number"
+                    value={editedProfile.targetWeight || ''}
+                    onChange={(e) => updateEditedProfile('targetWeight', e.target.value)}
+                    placeholder="65"
+                  />
+                </div>
+              )}
 
               <div className="space-y-2">
                 <Label>Основная цель</Label>
@@ -339,6 +398,35 @@ export function AccountPage({ onNavigate, onLogout, user }: AccountPageProps) {
                     <SelectItem value="общая-форма">Общая физическая форма</SelectItem>
                   </SelectContent>
                 </Select>
+              </div>
+
+              <div className="space-y-3">
+                <Label>Дополнительные цели</Label>
+                <div className="space-y-2">
+                  {[
+                    { value: 'stress-relief', label: 'Снятие стресса' },
+                    { value: 'sleep-improvement', label: 'Улучшение сна' },
+                    { value: 'energy-boost', label: 'Повышение энергии' },
+                    { value: 'posture', label: 'Улучшение осанки' },
+                    { value: 'injury-prevention', label: 'Профилактика травм' }
+                  ].map((goal) => (
+                    <div key={goal.value} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={`specific-${goal.value}`}
+                        checked={(editedProfile.specificGoals || []).includes(goal.value)}
+                        onCheckedChange={(checked) => {
+                          const current = editedProfile.specificGoals || [];
+                          if (checked) {
+                            updateEditedProfile('specificGoals', [...current, goal.value]);
+                          } else {
+                            updateEditedProfile('specificGoals', current.filter(item => item !== goal.value));
+                          }
+                        }}
+                      />
+                      <Label htmlFor={`specific-${goal.value}`}>{goal.label}</Label>
+                    </div>
+                  ))}
+                </div>
               </div>
 
               <div className="space-y-2">
@@ -394,6 +482,122 @@ export function AccountPage({ onNavigate, onLogout, user }: AccountPageProps) {
                   </Select>
                 </div>
               </div>
+
+              <div className="space-y-3">
+                <Label>Предпочитаемые типы тренировок</Label>
+                <div className="space-y-2">
+                  {[
+                    { value: 'strength', label: 'Силовые тренировки' },
+                    { value: 'cardio', label: 'Кардио' },
+                    { value: 'yoga', label: 'Йога' },
+                    { value: 'pilates', label: 'Пилатес' },
+                    { value: 'hiit', label: 'HIIT тренировки' },
+                    { value: 'stretching', label: 'Растяжка' }
+                  ].map((type) => (
+                    <div key={type.value} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={`type-${type.value}`}
+                        checked={(editedProfile.preferredWorkoutTypes || []).includes(type.value)}
+                        onCheckedChange={(checked) => {
+                          const current = editedProfile.preferredWorkoutTypes || [];
+                          if (checked) {
+                            updateEditedProfile('preferredWorkoutTypes', [...current, type.value]);
+                          } else {
+                            updateEditedProfile('preferredWorkoutTypes', current.filter(item => item !== type.value));
+                          }
+                        }}
+                      />
+                      <Label htmlFor={`type-${type.value}`}>{type.label}</Label>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Травмы или проблемы со здоровьем</Label>
+                <Textarea
+                  value={editedProfile.injuries || ''}
+                  onChange={(e) => updateEditedProfile('injuries', e.target.value)}
+                  placeholder="Опишите травмы, боли или ограничения (если есть)"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label>Другие ограничения</Label>
+                <Textarea
+                  value={editedProfile.limitations || ''}
+                  onChange={(e) => updateEditedProfile('limitations', e.target.value)}
+                  placeholder="Аллергии, непереносимость нагрузок и т.д."
+                />
+              </div>
+
+              <div className="space-y-3">
+                <Label>Доступные дни для тренировок</Label>
+                <div className="grid grid-cols-2 gap-4">
+                  {[
+                    { value: 'monday', label: 'Понедельник' },
+                    { value: 'tuesday', label: 'Вторник' },
+                    { value: 'wednesday', label: 'Среда' },
+                    { value: 'thursday', label: 'Четверг' },
+                    { value: 'friday', label: 'Пятница' },
+                    { value: 'saturday', label: 'Суббота' },
+                    { value: 'sunday', label: 'Воскресенье' }
+                  ].map((day) => (
+                    <div key={day.value} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={`day-${day.value}`}
+                        checked={(editedProfile.availableDays || []).includes(day.value)}
+                        onCheckedChange={(checked) => {
+                          const current = editedProfile.availableDays || [];
+                          if (checked) {
+                            updateEditedProfile('availableDays', [...current, day.value]);
+                          } else {
+                            updateEditedProfile('availableDays', current.filter(item => item !== day.value));
+                          }
+                        }}
+                      />
+                      <Label htmlFor={`day-${day.value}`}>{day.label}</Label>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Предпочитаемое время тренировок</Label>
+                  <Select
+                    value={editedProfile.preferredTime || ''}
+                    onValueChange={(value) => updateEditedProfile('preferredTime', value)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Выберите время" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="morning">Утром (6:00-10:00)</SelectItem>
+                      <SelectItem value="lunch">В обед (11:00-14:00)</SelectItem>
+                      <SelectItem value="afternoon">После обеда (15:00-18:00)</SelectItem>
+                      <SelectItem value="evening">Вечером (19:00-22:00)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label>Доступное оборудование</Label>
+                  <Select
+                    value={editedProfile.equipment ? editedProfile.equipment.join(',') : ''}
+                    onValueChange={(value) => updateEditedProfile('equipment', value.split(',').map(s => s.trim()))}
+                    placeholder="Выберите оборудование"
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Домашнее, Тренажерный зал" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="home">Домашнее</SelectItem>
+                      <SelectItem value="gym">Тренажерный зал</SelectItem>
+                      <SelectItem value="both">Оба</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
             </>
           ) : (
             <div className="space-y-3">
@@ -404,6 +608,10 @@ export function AccountPage({ onNavigate, onLogout, user }: AccountPageProps) {
               <div className="flex justify-between">
                 <span className="text-sm text-muted-foreground">Email:</span>
                 <span>{profile?.email || user.email}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-sm text-muted-foreground">Пол:</span>
+                <span>{profile?.gender === 'male' ? 'Мужской' : profile?.gender === 'female' ? 'Женский' : 'Не указано'}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-sm text-muted-foreground">Возраст:</span>
@@ -427,15 +635,6 @@ export function AccountPage({ onNavigate, onLogout, user }: AccountPageProps) {
                   profile?.primaryGoal === 'гибкость' ? 'Гибкость' :
                   profile?.primaryGoal === 'общая-форма' ? 'Общая физическая форма' :
                   profile?.primaryGoal || 'Не указано'
-                }</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-sm text-muted-foreground">Уровень:</span>
-                <span>{
-                  profile?.fitnessLevel === 'начинающий' ? 'Начинающий' :
-                  profile?.fitnessLevel === 'средний' ? 'Средний' :
-                  profile?.fitnessLevel === 'продвинутый' ? 'Продвинутый' :
-                  profile?.fitnessLevel || 'Не указано'
                 }</span>
               </div>
             </div>

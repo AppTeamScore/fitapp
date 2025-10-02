@@ -144,7 +144,7 @@ export function HomePage({ onNavigate, user, onLogout }: HomePageProps) {
 
       <div className="p-4 space-y-6">
         {/* Уведомления */}
-        <NotificationBanner />
+        {/* <NotificationBanner /> */}
 
         {/* Виджет прогресса */}
         <ProgressWidget />
