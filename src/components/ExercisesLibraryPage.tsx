@@ -184,7 +184,7 @@ export function ExercisesLibraryPage({ onNavigate, onStartWorkout }: ExercisesLi
                     <VideoPlayer
                       videoSrc={exercise.video}
                       exerciseName={exercise.name}
-                      autoPlay={false}
+                      autoPlay={true}
                       loop={true}
                       muted={true}
                     />

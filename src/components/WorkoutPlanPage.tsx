@@ -490,7 +490,7 @@ export function WorkoutPlanPage({ onNavigate, onStartWorkout }: WorkoutPlanPageP
                             <VideoPlayer
                               videoSrc={fullExercise.video}
                               exerciseName={exercise.name}
-                              autoPlay={false}
+                              autoPlay={true}
                               loop={true}
                               muted={true}
                             />
