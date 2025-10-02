@@ -9,6 +9,7 @@ import { toast } from 'sonner@2.0.3';
 import { projectId, publicAnonKey } from '../utils/supabase/info';
 import { supabase } from '../utils/supabase/client';
 import { exercises } from '../data/exercises';
+import { VideoPlayer } from './VideoPlayer';
 import { generateWorkoutPlan } from '../utils/llm';
 
 interface WorkoutPlanPageProps {
@@ -47,6 +48,7 @@ export function WorkoutPlanPage({ onNavigate, onStartWorkout }: WorkoutPlanPageP
   const [isGenerating, setIsGenerating] = useState(false);
   const [expandedDays, setExpandedDays] = useState<Set<number>>(new Set());
   const [isRecommendationsExpanded, setIsRecommendationsExpanded] = useState(false);
+  const [selectedExercise, setSelectedExercise] = useState<string | null>(null);
 
   useEffect(() => {
     loadWorkoutPlan();
@@ -445,23 +447,58 @@ export function WorkoutPlanPage({ onNavigate, onStartWorkout }: WorkoutPlanPageP
               </CardHeader>
               <CardContent className="pt-0 flex flex-col flex-1">
                 <div className="space-y-2 mb-4 flex-1">
-                  {dayWorkout.exercises.slice(0, expandedDays.has(index) ? dayWorkout.exercises.length : 3).map((exercise, exerciseIndex) => (
-                    <div key={exerciseIndex} className="text-sm p-2 bg-muted/50 rounded">
-                      <p className="font-medium truncate">{exercise.name}</p>
-                      <div className="text-xs text-muted-foreground space-y-1">
-                        <p>{exercise.sets} подхода × {exercise.reps}</p>
-                        <div className="flex gap-2">
-                          <span>{exercise.duration}с</span>
-                          {exercise.weight && (
-                            <span>• {exercise.weight}кг</span>
-                          )}
-                          {exercise.restTime && (
-                            <span>• отдых {exercise.restTime}с</span>
-                          )}
+                  {dayWorkout.exercises.slice(0, expandedDays.has(index) ? dayWorkout.exercises.length : 3).map((exercise, exerciseIndex) => {
+                    const fullExercise = exercises.find(ex =>
+                      ex.name.toLowerCase().includes(exercise.name.toLowerCase()) ||
+                      exercise.name.toLowerCase().includes(ex.name.toLowerCase())
+                    );
+                    
+                    return (
+                      <div key={exerciseIndex} className="text-sm p-2 bg-muted/50 rounded space-y-1">
+                        <div>
+                          <p className="font-medium truncate">{exercise.name}</p>
+                          <div className="text-xs text-muted-foreground space-y-1">
+                            <p>{exercise.sets} подхода × {exercise.reps}</p>
+                            <div className="flex gap-2">
+                              <span>{exercise.duration}с</span>
+                              {exercise.weight && (
+                                <span>• {exercise.weight}кг</span>
+                              )}
+                              {exercise.restTime && (
+                                <span>• отдых {exercise.restTime}с</span>
+                              )}
+                            </div>
+                          </div>
                         </div>
+                        
+                        {fullExercise && (
+                          <div className="flex gap-2 pt-1">
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => setSelectedExercise(selectedExercise === exercise.name ? null : exercise.name)}
+                              className="h-6 px-2 text-xs flex-1"
+                            >
+                              {/* <Dumbbell  className="h-3 w-3 mr-1" /> */}
+                              {selectedExercise === exercise.name ? "Скрыть" : "Посмотреть упражнение"}
+                            </Button>
+                          </div>
+                        )}
+                        
+                        {selectedExercise === exercise.name && fullExercise?.video && (
+                          <div className="mt-2 p-2 bg-background rounded">
+                            <VideoPlayer
+                              videoSrc={fullExercise.video}
+                              exerciseName={exercise.name}
+                              autoPlay={false}
+                              loop={true}
+                              muted={true}
+                            />
+                          </div>
+                        )}
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                   {dayWorkout.exercises.length > 3 && (
                     <div className="text-center py-2">
                       <Button
