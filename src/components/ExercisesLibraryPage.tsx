@@ -199,7 +199,19 @@ export function ExercisesLibraryPage({ onNavigate, onStartWorkout }: ExercisesLi
       {/* Список упражнений */}
       <div className="space-y-3">
         {filteredExercises.map((exercise) => (
-          <Card key={exercise.id} className="hover:shadow-md transition-shadow">
+          <Card
+            key={exercise.id}
+            className="hover:shadow-md transition-shadow cursor-pointer"
+            onClick={(e) => {
+              // Проверяем, что клик не был по кнопке
+              if (!(e.target instanceof HTMLElement) ||
+                  e.target.closest('button') ||
+                  e.target.closest('Badge')) {
+                return;
+              }
+              handlePreviewExercise(exercise);
+            }}
+          >
             <CardContent className="p-4">
               <div className="space-y-4">
                 <div className="flex items-start justify-between">
@@ -226,7 +238,10 @@ export function ExercisesLibraryPage({ onNavigate, onStartWorkout }: ExercisesLi
 
                   <div className="ml-4 flex flex-col gap-2">
                     <Button
-                      onClick={() => handlePreviewExercise(exercise)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handlePreviewExercise(exercise);
+                      }}
                       size="sm"
                       variant="outline"
                     >
@@ -234,7 +249,10 @@ export function ExercisesLibraryPage({ onNavigate, onStartWorkout }: ExercisesLi
                       {selectedExercise?.id === exercise.id ? "Скрыть" : "Просмотр"}
                     </Button>
                     <Button
-                      onClick={() => handlePlayExercise(exercise)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handlePlayExercise(exercise);
+                      }}
                       size="sm"
                     >
                       Попробовать
