@@ -11,6 +11,10 @@
     {
       "source": "/api/(.*)",
       "destination": "/supabase/functions/server/index.tsx"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
     }
   ],
   "headers": [

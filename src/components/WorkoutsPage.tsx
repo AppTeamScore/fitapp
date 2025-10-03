@@ -1,4 +1,4 @@
-import { ArrowLeft, Clock, Users, Zap, Play, Timer, Dumbbell, Target } from "lucide-react";
+import { ArrowLeft, Clock, Users, Zap, Play, Timer, Dumbbell, Target, Bot} from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
@@ -62,47 +62,33 @@ export function WorkoutsPage({ onNavigate, onStartWorkout }: WorkoutsPageProps) 
           onClick={() => onNavigate('plan')}
         >
           {/* Цветная полоса сверху */}
-          <div className="h-2 bg-gradient-to-r from-primary to-primary/80"></div>
+          <div className="bg-primary h-2 rounded-full w-[90%] animate-pulse"></div>
           
           <CardContent className="p-4">
             <div className="flex items-start justify-between mb-3">
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-2">
-                  <span className="text-lg">📋</span>
-                  <h3 className="font-bold text-lg leading-tight">Мой персональный план</h3>
+                  <span className="text-lg">🦾</span>
+                  <h3 className="font-bold text-lg leading-tight">Индивидуальный план тренировок</h3>
                 </div>
                 <p className="text-muted-foreground text-sm line-clamp-2 mb-3">
-                  Перейдите к вашим персонализированным тренировкам, созданным специально для вас
+                  Индивидуально проработанный план тренировок с помощью AI
                 </p>
               </div>
             </div>
-
-            {/* Статистика */}
-            <div className="flex items-center gap-4 mb-4 text-sm text-muted-foreground">
-              <div className="flex items-center gap-1">
-                <Clock className="w-4 h-4" />
-                <span>Когда удобно</span>
-              </div>
-              <div className="flex items-center gap-1">
-                <Users className="w-4 h-4" />
-                <span>Персональный</span>
-              </div>
-            </div>
+  
 
             {/* Бейджи */}
             <div className="flex items-center justify-between">
               <div className="flex gap-2">
-                <Badge variant="secondary" className="text-xs">
-                  Персональный
-                </Badge>
-                <Badge className="text-xs bg-primary/10 text-primary" variant="outline">
-                  Ваш план
+                <Badge variant="secondary" className="text-sm">
+                  Создан с помощью AI
                 </Badge>
               </div>
               
               <Button size="sm" className="gap-2" variant="default">
-                <Play className="w-4 h-4" />
-                Перейти
+                <Bot className="w-4 h-4" />
+                Посмотреть
               </Button>
             </div>
           </CardContent>

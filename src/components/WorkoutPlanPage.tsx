@@ -3,7 +3,7 @@ import { Button } from './ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Badge } from './ui/badge';
 import { Separator } from './ui/separator';
-import { ArrowLeft, RefreshCw, Edit3, Play, CheckCircle, Clock, Target, Users, Trash2, Edit, LoaderCircle} from 'lucide-react';
+import { ArrowLeft, RefreshCw, Edit3, Play, CheckCircle, Clock, Target, Users, Trash2, Edit, LoaderCircle, ChevronDown } from 'lucide-react';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from './ui/alert-dialog';
 import { toast } from 'sonner@2.0.3';
 import { projectId, publicAnonKey } from '../utils/supabase/info';
@@ -44,10 +44,27 @@ interface PlanData {
 
 export function WorkoutPlanPage({ onNavigate, onStartWorkout }: WorkoutPlanPageProps) {
   const [planData, setPlanData] = useState<PlanData | null>(null);
+
+  // Функция для форматирования времени из секунд в минуты и секунды
+  const formatDuration = (seconds: number): string => {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+
+    if (seconds < 60) {
+      return `${seconds} сек`;
+    }
+
+    if (remainingSeconds === 0) {
+      return `${minutes} мин`;
+    }
+
+    return `${minutes} мин ${remainingSeconds} сек`;
+  };
   const [isLoading, setIsLoading] = useState(true);
   const [isGenerating, setIsGenerating] = useState(false);
   const [expandedDays, setExpandedDays] = useState<Set<number>>(new Set());
   const [isRecommendationsExpanded, setIsRecommendationsExpanded] = useState(false);
+  const [isPlanInfoExpanded, setIsPlanInfoExpanded] = useState(false);
   const [selectedExercise, setSelectedExercise] = useState<string | null>(null);
 
   useEffect(() => {
@@ -320,19 +337,10 @@ export function WorkoutPlanPage({ onNavigate, onStartWorkout }: WorkoutPlanPageP
               <ArrowLeft className="w-4 h-4 mr-2" />
               Назад
             </Button>
-            <h1 className="text-2xl font-bold">Ваш план тренировок</h1>
+            <h1 className="text-2xl font-bold">Индивидуальный план</h1>
           </div>
           
           <div className="flex gap-2 flex-wrap justify-center">
-            <Button
-              variant="outline"
-              size="sm"
-              className="flex-1"
-              onClick={() => onNavigate('manual-plan')}
-            >
-              <Edit className="w-4 h-4 mr-2" />
-              Редактировать
-            </Button>
             <Button
               variant="outline"
               size="sm"
@@ -347,6 +355,16 @@ export function WorkoutPlanPage({ onNavigate, onStartWorkout }: WorkoutPlanPageP
               )}
               Новый план
             </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className="flex-1"
+              onClick={() => onNavigate('manual-plan')}
+            >
+              <Edit className="w-4 h-4 mr-2" />
+              Редактировать
+            </Button>
+            
             <AlertDialog>
               <AlertDialogTrigger asChild>
                 <Button variant="outline" size="sm" className="flex-1">
@@ -374,56 +392,64 @@ export function WorkoutPlanPage({ onNavigate, onStartWorkout }: WorkoutPlanPageP
 
         {/* Информация о плане */}
         <Card className="mb-6">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Target className="w-5 h-5" />
-              Информация о плане
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="space-y-1">
-                <p className="text-sm font-medium text-muted-foreground">Цели</p>
-                <p className="text-sm">{planData.goals || 'Нет'}</p>
+          <CardHeader
+            className="p-0 cursor-pointer"
+            onClick={() => setIsPlanInfoExpanded(!isPlanInfoExpanded)}
+          >
+            <div className="flex items-center justify-between p-6">
+              <div className="flex items-center gap-2">
+                <Target className="w-5 h-5" />
+                <CardTitle>Информация о плане</CardTitle>
               </div>
-              <div className="space-y-1">
-                <p className="text-sm font-medium text-muted-foreground">Уровень</p>
-                <p className="text-sm">{planData.fitnessLevel || 'Нет'}</p>
-              </div>
-              <div className="space-y-1">
-                <p className="text-sm font-medium text-muted-foreground">Ограничения</p>
-                <p className="text-sm">{planData.limitations || 'Нет'}</p>
-              </div>
+              <ChevronDown className={`w-4 h-4 transition-transform ${isPlanInfoExpanded ? 'rotate-180' : ''}`} />
             </div>
-            
-            {planData.plan.recommendations && (
-              <div className="mt-4 p-4 bg-muted/50 rounded-lg">
-                <p className="text-sm font-medium mb-2">Рекомендации:</p>
-                {(() => {
-                  const recText = planData.plan.recommendations || 'Из-за редактирования плана, все данные устарели.';
-                  const maxLength = 200;
-                  const isLong = recText.length > maxLength;
-                  const displayText = isLong && !isRecommendationsExpanded ? recText.slice(0, maxLength) + '...' : recText;
-                  
-                  return (
-                    <div className="space-y-2">
-                      <p className="text-sm text-muted-foreground text-justify leading-relaxed hyphens-auto">{displayText}</p>
-                      {isLong && (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => setIsRecommendationsExpanded(!isRecommendationsExpanded)}
-                          className="w-full justify-center"
-                        >
-                          {isRecommendationsExpanded ? 'Скрыть' : 'Показать полностью'}
-                        </Button>
-                      )}
-                    </div>
-                  );
-                })()}
+          </CardHeader>
+          {isPlanInfoExpanded && (
+            <CardContent className="p-6 pt-0 space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="space-y-1">
+                  <p className="text-sm font-medium text-muted-foreground">Цели</p>
+                  <p className="text-sm">{planData.goals || 'Нет'}</p>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-sm font-medium text-muted-foreground">Уровень</p>
+                  <p className="text-sm">{planData.fitnessLevel || 'Нет'}</p>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-sm font-medium text-muted-foreground">Ограничения</p>
+                  <p className="text-sm">{planData.limitations || 'Нет'}</p>
+                </div>
               </div>
-            )}
-          </CardContent>
+              
+              {planData.plan.recommendations && (
+                <div className="mt-4 p-4 bg-muted/50 rounded-lg">
+                  <p className="text-sm font-medium mb-2">Рекомендации:</p>
+                  {(() => {
+                    const recText = planData.plan.recommendations || 'Из-за редактирования плана, все данные устарели.';
+                    const maxLength = 200;
+                    const isLong = recText.length > maxLength;
+                    const displayText = isLong && !isRecommendationsExpanded ? recText.slice(0, maxLength) + '...' : recText;
+                    
+                    return (
+                      <div className="space-y-2">
+                        <p className="text-sm text-muted-foreground text-justify leading-relaxed hyphens-auto">{displayText}</p>
+                        {isLong && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setIsRecommendationsExpanded(!isRecommendationsExpanded)}
+                            className="w-full justify-center"
+                          >
+                            {isRecommendationsExpanded ? 'Скрыть' : 'Показать полностью'}
+                          </Button>
+                        )}
+                      </div>
+                    );
+                  })()}
+                </div>
+              )}
+            </CardContent>
+          )}
         </Card>
 
         {/* Тренировки по дням */}
@@ -431,7 +457,7 @@ export function WorkoutPlanPage({ onNavigate, onStartWorkout }: WorkoutPlanPageP
           <h2 className="text-xl font-semibold"></h2>
           {planData.plan.weekPlan.map((dayWorkout, index) => (
             <Card key={index} className="overflow-hidden">
-              <CardHeader className="pb-3">
+              <CardHeader className="pb-2">
                 <div className="flex items-start justify-between">
                   <div className="space-y-1">
                     <div className="flex items-center gap-2">
@@ -460,12 +486,12 @@ export function WorkoutPlanPage({ onNavigate, onStartWorkout }: WorkoutPlanPageP
                           <div className="text-xs text-muted-foreground space-y-1">
                             <p>{exercise.sets} подхода × {exercise.reps}</p>
                             <div className="flex gap-2">
-                              <span>{exercise.duration}с</span>
+                              <span>Время на один подход: {formatDuration(exercise.duration)}</span>
                               {exercise.weight && (
                                 <span>• {exercise.weight}кг</span>
                               )}
                               {exercise.restTime && (
-                                <span>• отдых {exercise.restTime}с</span>
+                                <span>• отдых {formatDuration(exercise.restTime)}</span>
                               )}
                             </div>
                           </div>

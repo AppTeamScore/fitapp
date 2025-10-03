@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Calendar, Timer, TrendingUp, Dumbbell, BookOpen, Target, LogOut, User, BarChart3, Settings, Play, Flame, Trophy, Zap } from "lucide-react";
+import { Calendar, Timer, TrendingUp, Dumbbell, BookOpen, Target, LogOut, User, BarChart3, Settings, Play, Flame, Trophy, Zap, BicepsFlexed} from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Button } from "./ui/button";
 import { Progress } from "./ui/progress";
@@ -150,7 +150,7 @@ export function HomePage({ onNavigate, user, onLogout }: HomePageProps) {
         <ProgressWidget />
 
         {/* Статистика */}
-        <div className="grid grid-cols-3 gap-3">
+        {/* <div className="grid grid-cols-3 gap-3">
           {stats.map((stat, index) => (
             <Card key={index} className="relative overflow-hidden hover:shadow-md transition-shadow">
               <CardContent className="p-4 text-center">
@@ -168,7 +168,7 @@ export function HomePage({ onNavigate, user, onLogout }: HomePageProps) {
               </CardContent>
             </Card>
           ))}
-        </div>
+        </div> */}
 
         {/* Быстрый старт */}
         <div className="space-y-3">
@@ -217,11 +217,11 @@ export function HomePage({ onNavigate, user, onLogout }: HomePageProps) {
             >
               <div className="flex items-center">
                 <div className="p-2 mr-3 rounded-lg bg-amber-100 text-amber-600">
-                  <BookOpen className="h-5 w-5" />
+                  <BicepsFlexed className="h-5 w-5" />
                 </div>
                 <div>
                   <p className="font-medium">Библиотека упражнений</p>
-                  <p className="text-sm text-muted-foreground">130+ упражнений</p>
+                  <p className="text-sm text-muted-foreground">140+ упражнений</p>
                 </div>
               </div>
             </Button>

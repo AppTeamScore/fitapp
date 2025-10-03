@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { ArrowLeft, ChevronLeft, ChevronRight, CheckCircle2, Plus } from "lucide-react";
+import { ArrowLeft, ChevronLeft, ChevronRight, CheckCircle2, Plus, Info} from "lucide-react";
 import { Button } from "./ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Badge } from "./ui/badge";
@@ -229,6 +229,19 @@ export function CalendarPage({ onNavigate }: CalendarPageProps) {
           </CardContent>
         </Card>
       </div>
+
+      {/* Инструкции */}
+      <Card>
+        <CardContent className="p-4">
+          <h3 className="font-semibold mb-3">Как использовать</h3>
+          <div className="space-y-2 text-sm text-muted-foreground">
+            <div className="flex items-center">
+              <Info className="h-4 w-4 text-green-600 mr-2" />
+              Нажматие на любой день месяца открывает меню добавления тренировок
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Календарь */}
       <Card>

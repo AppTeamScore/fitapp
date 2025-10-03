@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { TrendingUp, Target, Clock, Calendar, Award } from 'lucide-react';
+import { TrendingUp, Target, Clock, Calendar, Award, Dumbbell} from 'lucide-react';
 import { Card, CardContent } from './ui/card';
 import { Progress } from './ui/progress';
 import { Badge } from './ui/badge';
@@ -140,10 +140,10 @@ export function ProgressWidget({ className = '' }: ProgressWidgetProps) {
         <div className="grid grid-cols-3 gap-4 pt-2 border-t border-border/50">
           <div className="text-center">
             <div className="flex items-center justify-center mb-1">
-              <Clock className="w-4 h-4 text-blue-500" />
+              <Dumbbell className="w-4 h-4 text-blue-500" />
             </div>
-            <div className="text-lg font-bold text-blue-600">{Math.round(stats.totalMinutes / 60)}</div>
-            <div className="text-xs text-muted-foreground">часов</div>
+            <div className="text-lg font-bold text-blue-600">{stats.weeklyWorkouts}</div>
+            <div className="text-xs text-muted-foreground">Тренировок в неделю</div>
           </div>
           
           <div className="text-center">
