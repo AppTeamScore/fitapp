@@ -1,20 +1,16 @@
 {
   "buildCommand": "npm run build",
-  "outputDirectory": "build",
+  "outputDirectory": "dist",
   "framework": "vite",
   "functions": {
-    "api/index.tsx": {
+    "supabase/functions/server/index.tsx": {
       "runtime": "@vercel/node@3.0.0"
     }
   },
   "rewrites": [
     {
       "source": "/api/(.*)",
-      "destination": "/api/index.tsx"
-    },
-    {
-      "source": "/(.*)",
-      "destination": "/index.html"
+      "destination": "/supabase/functions/server/index.tsx"
     }
   ],
   "headers": [
