@@ -47,7 +47,7 @@ export function WorkoutsPage({ onNavigate, onStartWorkout }: WorkoutsPageProps) 
       <div className="sticky top-0 bg-background/95 backdrop-blur-sm border-b border-border/50 z-10">
         <div className="p-4">
           <div className="flex items-center">
-            <Button onClick={() => onNavigate('home')} variant="ghost" size="sm" className="mr-4">
+            <Button onClick={() => onNavigate('back')} variant="ghost" size="sm" className="mr-4">
               <ArrowLeft className="w-4 h-4 mr-2" />
               Назад
             </Button>

@@ -53,6 +53,8 @@ export default function App() {
         logger.info('Пользователь не авторизован, переход на страницу авторизации');
         setCurrentPage('auth');
         localStorage.removeItem('currentPage');
+        // Обновляем URL для страницы авторизации
+        window.history.replaceState({ page: 'auth', stack: ['auth'] }, '', '/auth');
       }
     } catch (error) {
       logger.error('Ошибка проверки авторизации', error as Error);
@@ -83,6 +85,9 @@ export default function App() {
         localStorage.setItem('currentPage', targetPage);
         // Восстанавливаем стек если нужно, но для простоты сбрасываем на текущую
         setPageStack([targetPage]);
+        
+        // Обновляем URL для соответствия текущей странице
+        window.history.replaceState({ page: targetPage, stack: [targetPage] }, '', `/${targetPage}`);
       } else {
         logger.info('Требуется онбординг', { hasProfile: !!result.profile });
         setNeedsOnboarding(true);
@@ -99,6 +104,9 @@ export default function App() {
       setCurrentPage(targetPage);
       localStorage.setItem('currentPage', targetPage);
       setPageStack([targetPage]);
+      
+      // Обновляем URL для соответствия текущей странице
+      window.history.replaceState({ page: targetPage, stack: [targetPage] }, '', `/${targetPage}`);
     } finally {
       logger.endFunction('checkOnboardingStatus');
     }
@@ -119,6 +127,8 @@ export default function App() {
       logger.warn('Не удалось получить токен сессии после авторизации');
       setNeedsOnboarding(true);
       setCurrentPage('onboarding');
+      // Обновляем URL для страницы онбординга
+      window.history.replaceState({ page: 'onboarding', stack: ['onboarding'] }, '', '/onboarding');
     }
     logger.endFunction('handleAuthSuccess');
   };
@@ -127,7 +137,7 @@ export default function App() {
     logger.logUserAction('Завершение онбординга');
     logger.info('Онбординг завершен, переход на главную страницу');
     setNeedsOnboarding(false);
-    setCurrentPage('home');
+    handleNavigate('home');
   };
 
   const handleNavigate = (page: string) => {
@@ -135,28 +145,14 @@ export default function App() {
     logger.logAppState(`Переход на страницу: ${page}`, { previousPage: currentPage });
     
     if (page === 'back') {
-      // Навигация назад
-      if (pageStack.length > 1) {
-        const newStack = pageStack.slice(0, -1);
-        const newPage = newStack[newStack.length - 1];
-        setPageStack(newStack);
-        setPendingPage(newPage);
-        setTimeout(() => {
-          setCurrentPage(newPage);
-          localStorage.setItem('currentPage', newPage);
-          setPendingPage(null);
-        }, 300);
-      } else {
-        const homePage = 'home';
-        setPendingPage(homePage);
-        setTimeout(() => {
-          setCurrentPage(homePage);
-          localStorage.setItem('currentPage', homePage);
-          setPendingPage(null);
-        }, 300);
-      }
+      // Навигация назад через браузерную историю
+      window.history.back();
     } else {
-      // Обычная навигация
+      // Обычная навигация с обновлением URL
+      const url = `/${page}`;
+      window.history.pushState({ page, stack: [...pageStack, page] }, '', url);
+      
+      // Обновляем состояние приложения
       setPageStack(prev => [...prev, page]);
       setPendingPage(page);
       setTimeout(() => {
@@ -171,7 +167,9 @@ export default function App() {
     logger.logUserAction('Начало тренировки', { workoutId: workout.id, workoutName: workout.name });
     logger.info('Запуск тренировки', { workoutId: workout.id, workoutName: workout.name });
     setCurrentWorkout(workout);
-    setCurrentPage('timer');
+    
+    // Используем handleNavigate для корректной работы с историей
+    handleNavigate('timer');
   };
 
   const handleLogout = async () => {
@@ -184,6 +182,8 @@ export default function App() {
     localStorage.removeItem('completedWorkouts');
     localStorage.removeItem('plannedWorkouts');
     setCurrentPage('auth');
+    // Обновляем URL для страницы авторизации
+    window.history.replaceState({ page: 'auth', stack: ['auth'] }, '', '/auth');
     logger.endFunction('handleLogout');
   };
 
@@ -264,6 +264,78 @@ export default function App() {
       }
     }
   }, [user, currentPage]);
+
+  // Обработка навигации через кнопки браузера (назад/вперед)
+  useEffect(() => {
+    const handlePopState = (event: PopStateEvent) => {
+      logger.logUserAction('Навигация через браузер', {
+        state: event.state,
+        currentLocation: window.location.pathname
+      });
+      
+      if (event.state?.page) {
+        // Если в состоянии есть информация о странице, используем её
+        const targetPage = event.state.page;
+        
+        // Обновляем стек страниц
+        if (event.state?.stack) {
+          setPageStack(event.state.stack);
+        } else {
+          // Если стека нет, создаем простой стек
+          setPageStack([targetPage]);
+        }
+        
+        // Устанавливаем новую страницу
+        setPendingPage(targetPage);
+        setTimeout(() => {
+          setCurrentPage(targetPage);
+          localStorage.setItem('currentPage', targetPage);
+          setPendingPage(null);
+        }, 300);
+      } else {
+        // Если состояния нет, пытаемся определить страницу из URL
+        const path = window.location.pathname.slice(1); // Убираем '/'
+        const validPages = ['home', 'workouts', 'plan', 'calendar', 'exercises', 'stats', 'account', 'timer'];
+        
+        if (path && validPages.includes(path)) {
+          setPageStack([path]);
+          setPendingPage(path);
+          setTimeout(() => {
+            setCurrentPage(path);
+            localStorage.setItem('currentPage', path);
+            setPendingPage(null);
+          }, 300);
+        } else {
+          // Если URL некорректный, возвращаемся на главную
+          setPageStack(['home']);
+          setPendingPage('home');
+          setTimeout(() => {
+            setCurrentPage('home');
+            localStorage.setItem('currentPage', 'home');
+            setPendingPage(null);
+          }, 300);
+        }
+      }
+    };
+
+    // Добавляем обработчик для событий popstate
+    window.addEventListener('popstate', handlePopState);
+    
+    // Инициализация при первой загрузке - восстанавливаем состояние из URL
+    const path = window.location.pathname.slice(1);
+    const validPages = ['home', 'workouts', 'plan', 'calendar', 'exercises', 'stats', 'account', 'timer'];
+    
+    if (path && validPages.includes(path) && currentPage === 'loading') {
+      logger.info('Восстановление страницы из URL', { page: path });
+      setCurrentPage(path);
+      setPageStack([path]);
+      localStorage.setItem('currentPage', path);
+    }
+
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+    };
+  }, [currentPage]);
 
   return (
     <ErrorBoundary>

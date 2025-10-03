@@ -3,6 +3,14 @@ import { ArrowLeft, ChevronLeft, ChevronRight, CheckCircle2, Plus } from "lucide
 import { Button } from "./ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Badge } from "./ui/badge";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "./ui/dialog";
 
 interface CalendarPageProps {
   onNavigate: (page: string) => void;
@@ -11,6 +19,9 @@ interface CalendarPageProps {
 export function CalendarPage({ onNavigate }: CalendarPageProps) {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [workoutData, setWorkoutData] = useState<Record<string, {type: string, completed: boolean}>>({});
+  const [showModal, setShowModal] = useState(false);
+  const [selectedDay, setSelectedDay] = useState<number | null>(null);
+  const [selectedType, setSelectedType] = useState<string>('');
   
   useEffect(() => {
     loadWorkoutData();
@@ -100,30 +111,66 @@ export function CalendarPage({ onNavigate }: CalendarPageProps) {
       case 'Кардио': return 'bg-blue-100 text-blue-800';
       case 'Силовая': return 'bg-red-100 text-red-800';
       case 'HIIT': return 'bg-orange-100 text-orange-800';
-      case 'Йога': return 'bg-green-100 text-green-800';
       case 'Тренировка': return 'bg-purple-100 text-purple-800';
       default: return 'bg-gray-100 text-gray-800';
     }
   };
 
-  const addWorkout = (day: number) => {
+  const workoutTypes = ['Кардио', 'Силовая', 'HIIT', 'Тренировка'];
+  
+  const openModal = (day: number) => {
+    setSelectedDay(day);
+    const dateKey = getDateKey(day);
+    const workout = workoutData[dateKey];
+    setSelectedType(workout ? workout.type : '');
+    setShowModal(true);
+  };
+  
+  const addWorkoutWithType = (day: number, type: string) => {
     const dateKey = getDateKey(day);
     const newWorkout = {
       date: dateKey,
-      type: 'Тренировка',
+      type,
       completed: false
     };
     
-    // Добавляем в plannedWorkouts в localStorage
-    const plannedWorkouts = JSON.parse(localStorage.getItem('plannedWorkouts') || '[]');
-    plannedWorkouts.push(newWorkout);
+    // Проверяем, нет ли уже завершенной тренировки
+    const completedWorkouts = JSON.parse(localStorage.getItem('completedWorkouts') || '[]');
+    const hasCompleted = completedWorkouts.some((w: any) => w.date.split('T')[0] === dateKey);
+    
+    if (!hasCompleted) {
+      const plannedWorkouts = JSON.parse(localStorage.getItem('plannedWorkouts') || '[]');
+      // Удаляем существующую запланированную, если есть
+      const filteredPlanned = plannedWorkouts.filter((w: any) => w.date.split('T')[0] !== dateKey);
+      filteredPlanned.push(newWorkout);
+      localStorage.setItem('plannedWorkouts', JSON.stringify(filteredPlanned));
+      
+      setWorkoutData(prev => ({
+        ...prev,
+        [dateKey]: { type, completed: false }
+      }));
+    }
+  };
+  
+  const removeWorkout = (day: number) => {
+    const dateKey = getDateKey(day);
+    
+    // Удаляем из plannedWorkouts
+    let plannedWorkouts = JSON.parse(localStorage.getItem('plannedWorkouts') || '[]');
+    plannedWorkouts = plannedWorkouts.filter((w: any) => w.date.split('T')[0] !== dateKey);
     localStorage.setItem('plannedWorkouts', JSON.stringify(plannedWorkouts));
     
-    // Обновляем локальное состояние
-    setWorkoutData(prev => ({
-      ...prev,
-      [dateKey]: { type: 'Тренировка', completed: false }
-    }));
+    // Удаляем из completedWorkouts
+    let completedWorkouts = JSON.parse(localStorage.getItem('completedWorkouts') || '[]');
+    completedWorkouts = completedWorkouts.filter((w: any) => w.date.split('T')[0] !== dateKey);
+    localStorage.setItem('completedWorkouts', JSON.stringify(completedWorkouts));
+    
+    // Обновляем состояние
+    setWorkoutData(prev => {
+      const newData = { ...prev };
+      delete newData[dateKey];
+      return newData;
+    });
   };
 
   const markCompleted = (day: number) => {
@@ -131,6 +178,11 @@ export function CalendarPage({ onNavigate }: CalendarPageProps) {
     const workout = workoutData[dateKey];
     
     if (workout && !workout.completed) {
+      // Удаляем из plannedWorkouts
+      let plannedWorkouts = JSON.parse(localStorage.getItem('plannedWorkouts') || '[]');
+      plannedWorkouts = plannedWorkouts.filter((w: any) => w.date.split('T')[0] !== dateKey);
+      localStorage.setItem('plannedWorkouts', JSON.stringify(plannedWorkouts));
+      
       // Добавляем в completedWorkouts
       const completedWorkouts = JSON.parse(localStorage.getItem('completedWorkouts') || '[]');
       completedWorkouts.push({
@@ -223,48 +275,27 @@ export function CalendarPage({ onNavigate }: CalendarPageProps) {
               const isToday = new Date().toDateString() === new Date(currentDate.getFullYear(), currentDate.getMonth(), day).toDateString();
               
               return (
-                <div key={day} className="relative">
-                  <div className={`
-                    p-2 text-center text-sm rounded-lg min-h-[3rem] border cursor-pointer
-                    ${isToday ? 'bg-primary text-primary-foreground' : 'hover:bg-muted'}
-                  `}>
+                <div key={index} className="relative">
+                  <div
+                    className={`
+                      p-2 text-center text-sm rounded-lg min-h-[3rem] border cursor-pointer
+                      ${isToday ? 'bg-primary text-primary-foreground' : 'hover:bg-muted'}
+                    `}
+                    onClick={() => openModal(day)}
+                  >
                     <div className="font-medium">{day}</div>
                     {workout ? (
                       <div className="mt-1 space-y-1">
-                        <Badge 
+                        <Badge
                           className={`text-xs ${getWorkoutTypeColor(workout.type)}`}
                         >
                           {workout.type}
                         </Badge>
-                        {workout.completed ? (
+                        {workout.completed && (
                           <CheckCircle2 className="h-3 w-3 text-green-600 mx-auto" />
-                        ) : (
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            className="h-4 w-4 p-0 text-xs"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              markCompleted(day);
-                            }}
-                          >
-                            ✓
-                          </Button>
                         )}
                       </div>
-                    ) : (
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        className="h-4 w-4 p-0 mt-1 opacity-50 hover:opacity-100"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          addWorkout(day);
-                        }}
-                      >
-                        <Plus className="h-3 w-3" />
-                      </Button>
-                    )}
+                    ) : null}
                   </div>
                 </div>
               );
@@ -272,19 +303,110 @@ export function CalendarPage({ onNavigate }: CalendarPageProps) {
           </div>
         </CardContent>
       </Card>
-
+      
+      {/* Модальное окно */}
+      <Dialog open={showModal} onOpenChange={setShowModal}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>
+              {selectedDay ? `День ${selectedDay}` : 'Выбор тренировки'}
+            </DialogTitle>
+            <DialogDescription>
+              Управление тренировкой на выбранный день.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
+            {selectedDay !== null && (
+              <>
+                {(() => {
+                  const dateKey = getDateKey(selectedDay);
+                  const workout = workoutData[dateKey];
+                  if (!workout) {
+                    return (
+                      <div className="space-y-3">
+                        <p className="text-sm font-medium">Выберите тип тренировки:</p>
+                        <div className="grid grid-cols-2 gap-2">
+                          {workoutTypes.map((type) => (
+                            <Button
+                              key={type}
+                              variant={selectedType === type ? "default" : "outline"}
+                              onClick={() => setSelectedType(type)}
+                              className="justify-start h-10"
+                            >
+                              {type}
+                            </Button>
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  } else {
+                    return (
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between p-2 bg-muted rounded-md">
+                          <Badge className={`text-xs ${getWorkoutTypeColor(workout.type)}`}>
+                            {workout.type}
+                          </Badge>
+                          {workout.completed && <CheckCircle2 className="h-4 w-4 text-green-600" />}
+                        </div>
+                        {!workout.completed ? (
+                          <Button
+                            onClick={() => {
+                              markCompleted(selectedDay);
+                              setShowModal(false);
+                            }}
+                            className="w-full h-10"
+                          >
+                            Подтвердить выполнение
+                          </Button>
+                        ) : (
+                          <div className="text-center py-2">
+                            <p className="text-sm text-green-600 font-medium">Тренировка завершена</p>
+                          </div>
+                        )}
+                        <Button
+                          variant="destructive"
+                          onClick={() => {
+                            removeWorkout(selectedDay);
+                            setShowModal(false);
+                          }}
+                          className="w-full h-10"
+                        >
+                          Удалить тренировку
+                        </Button>
+                      </div>
+                    );
+                  }
+                })()}
+                {!workoutData[getDateKey(selectedDay)] && (
+                  <DialogFooter className="pt-4 border-t">
+                    <Button
+                      onClick={() => {
+                        if (selectedType) {
+                          addWorkoutWithType(selectedDay, selectedType);
+                          setShowModal(false);
+                        }
+                      }}
+                      disabled={!selectedType}
+                      className="w-full"
+                    >
+                      Запланировать {selectedType}
+                    </Button>
+                  </DialogFooter>
+                )}
+              </>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
+      
       {/* Инструкции */}
-      <Card>
+      {/* <Card>
         <CardContent className="p-4">
           <h3 className="font-semibold mb-3">Как использовать</h3>
           <div className="space-y-2 text-sm text-muted-foreground">
             <div className="flex items-center">
-              <Plus className="h-4 w-4 mr-2" />
-              Нажмите + чтобы запланировать тренировку
-            </div>
-            <div className="flex items-center">
-              <span className="mr-2">✓</span>
-              Нажмите ✓ чтобы отметить тренировку как завершенную
+              <span className="mr-2">📅</span>
+              Нажмите на день чтобы управлять тренировкой
             </div>
             <div className="flex items-center">
               <CheckCircle2 className="h-4 w-4 text-green-600 mr-2" />
@@ -292,7 +414,7 @@ export function CalendarPage({ onNavigate }: CalendarPageProps) {
             </div>
           </div>
         </CardContent>
-      </Card>
+      </Card> */}
 
       {/* Legend */}
       <Card>
@@ -310,10 +432,6 @@ export function CalendarPage({ onNavigate }: CalendarPageProps) {
             <div className="flex items-center">
               <div className="w-3 h-3 rounded bg-orange-500 mr-2"></div>
               HIIT
-            </div>
-            <div className="flex items-center">
-              <div className="w-3 h-3 rounded bg-green-500 mr-2"></div>
-              Йога
             </div>
             <div className="flex items-center">
               <div className="w-3 h-3 rounded bg-purple-500 mr-2"></div>
