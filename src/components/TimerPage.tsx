@@ -342,8 +342,8 @@ export function TimerPage({ onNavigate, workout }: TimerPageProps) {
             </Badge>
             <div className="relative" onMouseEnter={() => setShowMuscleGroups(true)}
                  onMouseLeave={() => setShowMuscleGroups(false)}>
-              <Badge variant="outline" className="text-xs h-8 cursor-pointer hover:bg-accent/50 transition-colors">
-                {currentExercise?.muscleGroups?.join(", ") || "Нет групп"}
+              <Badge variant="secondary" className="text-xs h-8 cursor-pointer hover:bg-accent/50 transition-colors">
+                {currentExercise?.muscleGroups?.slice(0, 3).join(", ") || "Нет групп"}
                 {currentExercise?.muscleGroups && currentExercise.muscleGroups.length > 2 && (
                   <ChevronDown className="w-3 h-3 ml-1 inline" />
                 )}
