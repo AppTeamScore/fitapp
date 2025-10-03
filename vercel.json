@@ -1,6 +1,6 @@
 {
   "buildCommand": "npm run build",
-  "outputDirectory": "dist",
+  "outputDirectory": "build",
   "framework": "vite",
   "functions": {
     "supabase/functions/server/index.tsx": {
@@ -11,6 +11,10 @@
     {
       "source": "/api/(.*)",
       "destination": "/supabase/functions/server/index.tsx"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
     }
   ],
   "headers": [
