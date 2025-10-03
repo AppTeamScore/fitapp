@@ -7,6 +7,8 @@ import { ProgressWidget } from "./ProgressWidget";
 import { NotificationBanner } from "./NotificationBanner";
 import { eventBus } from "../utils/events";
 import { logger } from "../utils/logger";
+import { projectId } from "../utils/supabase/info";
+import { supabase } from "../utils/supabase/client";
 
 interface HomePageProps {
   onNavigate: (page: string) => void;
@@ -20,9 +22,12 @@ export function HomePage({ onNavigate, user, onLogout }: HomePageProps) {
     { title: "Минут активности", value: "0", icon: Timer },
     { title: "Дней подряд", value: "0", icon: TrendingUp },
   ]);
+  const [planData, setPlanData] = useState<any>(null);
+  const [isLoadingPlan, setIsLoadingPlan] = useState(true);
 
   useEffect(() => {
     loadUserStats();
+    loadWorkoutPlan();
     
     // Подписываемся на событие очистки статистики
     const unsubscribeStatsCleared = eventBus.on('stats:cleared', () => {
@@ -85,7 +90,45 @@ export function HomePage({ onNavigate, user, onLogout }: HomePageProps) {
     ]);
   };
 
-  const weeklyGoal = 5; // Цель тренировок в неделю
+  const loadWorkoutPlan = async () => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session?.access_token) {
+        setIsLoadingPlan(false);
+        return;
+      }
+
+      const response = await fetch(`https://${projectId}.supabase.co/functions/v1/make-server-c6c9ad1a/workout-plan`, {
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`
+        }
+      });
+
+      const result = await response.json();
+      
+      if (response.ok && result.planData) {
+        setPlanData(result.planData);
+      }
+    } catch (error) {
+      console.error('Ошибка загрузки плана:', error);
+    } finally {
+      setIsLoadingPlan(false);
+    }
+  };
+
+  // Рассчитываем количество тренировочных дней в плане пользователя
+  const getTrainingDaysInPlan = () => {
+    if (!planData?.plan?.weekPlan) return 0;
+    
+    return planData.plan.weekPlan.filter((day: any) =>
+      day.exercises && day.exercises.length > 0
+    ).length;
+  };
+
+  // Используем количество тренировочных дней в плане как цель недели, но не менее 3
+  const trainingDaysInPlan = getTrainingDaysInPlan();
+  const weeklyGoal = trainingDaysInPlan > 0 ? Math.max(3, trainingDaysInPlan) : 5;
   const currentWeeklyWorkouts = parseInt(stats[0].value);
   const weeklyProgress = Math.min((currentWeeklyWorkouts / weeklyGoal) * 100, 100);
 
@@ -124,27 +167,12 @@ export function HomePage({ onNavigate, user, onLogout }: HomePageProps) {
           </div>
 
           {/* Еженедельная цель */}
-          <Card className="bg-primary-foreground/10 border-primary-foreground/20">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between mb-2">
-                <h3 className="font-medium text-primary-foreground">Цель недели</h3>
-                <Trophy className="w-5 h-5 text-primary-foreground/80" />
-              </div>
-              <div className="space-y-2">
-                <div className="flex justify-between text-sm">
-                  <span className="text-primary-foreground/90">{currentWeeklyWorkouts} из {weeklyGoal} тренировок</span>
-                  <span className="text-primary-foreground/90">{Math.round(weeklyProgress)}%</span>
-                </div>
-                <Progress value={weeklyProgress} className="h-2 bg-primary-foreground/20" />
-              </div>
-            </CardContent>
-          </Card>
+          <NotificationBanner />
         </div>
       </div>
 
       <div className="p-4 space-y-6">
         {/* Уведомления */}
-        {/* <NotificationBanner /> */}
 
         {/* Виджет прогресса */}
         <ProgressWidget />

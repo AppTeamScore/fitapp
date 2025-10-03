@@ -5,7 +5,7 @@ import { Badge } from './ui/badge';
 import { Separator } from './ui/separator';
 import { ArrowLeft, RefreshCw, Edit3, Play, CheckCircle, Clock, Target, Users, Trash2, Edit, LoaderCircle, ChevronDown } from 'lucide-react';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from './ui/alert-dialog';
-import { toast } from 'sonner@2.0.3';
+import { toast } from 'sonner';
 import { projectId, publicAnonKey } from '../utils/supabase/info';
 import { supabase } from '../utils/supabase/client';
 import { exercises } from '../data/exercises';
@@ -171,10 +171,28 @@ export function WorkoutPlanPage({ onNavigate, onStartWorkout }: WorkoutPlanPageP
   const handleStartWorkout = (dayWorkout: any) => {
     // Находим упражнения из нашей базы данных
     const workoutExercises = dayWorkout.exercises.map((planExercise: any) => {
-      const foundExercise = exercises.find(ex =>
-        ex.name.toLowerCase().includes(planExercise.name.toLowerCase()) ||
-        planExercise.name.toLowerCase().includes(ex.name.toLowerCase())
-      );
+      // Сначала пробуем найти точное совпадение
+      let foundExercise = exercises.find(ex => ex.name === planExercise.name);
+      
+      // Если точного совпадения нет, пробуем нормализованное сравнение (без лишних пробелов)
+      if (!foundExercise) {
+        foundExercise = exercises.find(ex =>
+          ex.name.toLowerCase().replace(/\s+/g, ' ') === planExercise.name.toLowerCase().replace(/\s+/g, ' ')
+        );
+      }
+      
+      // Если нормализованное совпадение тоже не найдено, используем старый метод как запасной вариант
+      if (!foundExercise) {
+        foundExercise = exercises.find(ex =>
+          ex.name.toLowerCase().includes(planExercise.name.toLowerCase()) ||
+          planExercise.name.toLowerCase().includes(ex.name.toLowerCase())
+        );
+        
+        // Логируем случаи, когда используется неидеальное сопоставление
+        if (foundExercise) {
+          console.warn(`Неидеальное сопоставление упражнения: "${planExercise.name}" -> "${foundExercise.name}"`);
+        }
+      }
 
       return {
         ...foundExercise,
@@ -464,7 +482,7 @@ export function WorkoutPlanPage({ onNavigate, onStartWorkout }: WorkoutPlanPageP
                       <CardTitle className="text-lg">{dayWorkout.day}</CardTitle>
                       <Badge variant="secondary" className="text-xs">
                         <Clock className="w-3 h-3 mr-1" />
-                        Продолжительность ≈ {dayWorkout.totalDuration} мин
+                        Длительность ≈ {dayWorkout.totalDuration} мин
                       </Badge>
                     </div>
                     <p className="text-sm text-muted-foreground">{dayWorkout.workoutName}</p>
@@ -474,25 +492,31 @@ export function WorkoutPlanPage({ onNavigate, onStartWorkout }: WorkoutPlanPageP
               <CardContent className="pt-0 flex flex-col flex-1">
                 <div className="space-y-2 mb-4 flex-1">
                   {dayWorkout.exercises.slice(0, expandedDays.has(index) ? dayWorkout.exercises.length : 3).map((exercise, exerciseIndex) => {
-                    const fullExercise = exercises.find(ex =>
-                      ex.name.toLowerCase().includes(exercise.name.toLowerCase()) ||
-                      exercise.name.toLowerCase().includes(ex.name.toLowerCase())
-                    );
+                    // Улучшенный алгоритм поиска упражнения
+                    let fullExercise = exercises.find(ex => ex.name === exercise.name);
+                    
+                    if (!fullExercise) {
+                      fullExercise = exercises.find(ex =>
+                        ex.name.toLowerCase().replace(/\s+/g, ' ') === exercise.name.toLowerCase().replace(/\s+/g, ' ')
+                      );
+                    }
+                    
+                    if (!fullExercise) {
+                      fullExercise = exercises.find(ex =>
+                        ex.name.toLowerCase().includes(exercise.name.toLowerCase()) ||
+                        exercise.name.toLowerCase().includes(ex.name.toLowerCase())
+                      );
+                    }
                     
                     return (
                       <div key={exerciseIndex} className="text-sm p-2 bg-muted/50 rounded space-y-1">
                         <div>
                           <p className="font-medium truncate">{exercise.name}</p>
                           <div className="text-xs text-muted-foreground space-y-1">
-                            <p>{exercise.sets} подхода × {exercise.reps}</p>
-                            <div className="flex gap-2">
+                            {/* <p>{exercise.sets} подхода × {exercise.reps}</p> */}
+                            <div className="flex flex-col">
+                              <span>Всего походов: {exercise.sets}</span>
                               <span>Время на один подход: {formatDuration(exercise.duration)}</span>
-                              {exercise.weight && (
-                                <span>• {exercise.weight}кг</span>
-                              )}
-                              {exercise.restTime && (
-                                <span>• отдых {formatDuration(exercise.restTime)}</span>
-                              )}
                             </div>
                           </div>
                         </div>

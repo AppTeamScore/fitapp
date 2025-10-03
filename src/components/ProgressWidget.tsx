@@ -5,6 +5,8 @@ import { Progress } from './ui/progress';
 import { Badge } from './ui/badge';
 import { eventBus } from '../utils/events';
 import { logger } from '../utils/logger';
+import { projectId } from '../utils/supabase/info';
+import { supabase } from '../utils/supabase/client';
 
 interface ProgressWidgetProps {
   className?: string;
@@ -26,9 +28,12 @@ export function ProgressWidget({ className = '' }: ProgressWidgetProps) {
     streak: 0,
     monthlyProgress: 0
   });
+  const [planData, setPlanData] = useState<any>(null);
+  const [isLoadingPlan, setIsLoadingPlan] = useState(true);
 
   useEffect(() => {
     loadQuickStats();
+    loadWorkoutPlan();
     
     // Подписываемся на событие очистки статистики
     const unsubscribeStatsCleared = eventBus.on('stats:cleared', () => {
@@ -94,11 +99,52 @@ export function ProgressWidget({ className = '' }: ProgressWidgetProps) {
 
     setStats({
       weeklyWorkouts,
-      weeklyGoal: 5,
+      weeklyGoal: 5, // Временно, будет обновлено после загрузки плана
       totalMinutes,
       streak,
       monthlyProgress
     });
+  };
+
+  const loadWorkoutPlan = async () => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session?.access_token) {
+        setIsLoadingPlan(false);
+        return;
+      }
+
+      const response = await fetch(`https://${projectId}.supabase.co/functions/v1/make-server-c6c9ad1a/workout-plan`, {
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`
+        }
+      });
+
+      const result = await response.json();
+      
+      if (response.ok && result.planData) {
+        setPlanData(result.planData);
+        
+        // Рассчитываем количество тренировочных дней в плане пользователя
+        const trainingDaysInPlan = result.planData.plan?.weekPlan?.filter((day: any) =>
+          day.exercises && day.exercises.length > 0
+        ).length || 0;
+        
+        // Используем количество тренировочных дней в плане как цель недели, но не менее 3
+        const weeklyGoal = trainingDaysInPlan > 0 ? Math.max(3, trainingDaysInPlan) : 5;
+        
+        // Обновляем stats с правильной целью недели
+        setStats(prev => ({
+          ...prev,
+          weeklyGoal
+        }));
+      }
+    } catch (error) {
+      console.error('Ошибка загрузки плана:', error);
+    } finally {
+      setIsLoadingPlan(false);
+    }
   };
 
   const weeklyProgress = Math.min((stats.weeklyWorkouts / stats.weeklyGoal) * 100, 100);

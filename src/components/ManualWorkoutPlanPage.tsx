@@ -7,7 +7,7 @@ import { Label } from './ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { Badge } from './ui/badge';
 import { ScrollArea } from './ui/scroll-area';
-import { toast } from 'sonner@2.0.3';
+import { toast } from 'sonner';
 import { exercises, Exercise, getUniqueExercises } from '../data/exercises';
 import { supabase } from '../utils/supabase/client';
 import { projectId } from '../utils/supabase/info';
@@ -84,9 +84,26 @@ export function ManualWorkoutPlanPage({ onNavigate, onStartWorkout }: ManualWork
                 exercise = exercises.find(e => e.name === ex.name);
               }
               if (!exercise) {
-                // Если не нашли, берем первое упражнение как fallback
-                exercise = exercises[0];
-                console.warn(`Упражнение не найдено: ${ex.name}, используется fallback`);
+                // Пробуем нормализованное сравнение
+                exercise = exercises.find(e =>
+                  e.name.toLowerCase().replace(/\s+/g, ' ') === ex.name.toLowerCase().replace(/\s+/g, ' ')
+                );
+              }
+              if (!exercise) {
+                // Если не нашли, используем старый метод как запасной вариант
+                exercise = exercises.find(e =>
+                  e.name.toLowerCase().includes(ex.name.toLowerCase()) ||
+                  ex.name.toLowerCase().includes(e.name.toLowerCase())
+                );
+                
+                // Логируем случаи, когда используется неидеальное сопоставление
+                if (exercise) {
+                  console.warn(`Неидеальное сопоставление упражнения: "${ex.name}" -> "${exercise.name}"`);
+                } else {
+                  // Если не нашли, берем первое упражнение как fallback
+                  exercise = exercises[0];
+                  console.warn(`Упражнение не найдено: ${ex.name}, используется fallback`);
+                }
               }
               return {
                 ...ex,

@@ -34,6 +34,7 @@ export function TimerPage({ onNavigate, workout }: TimerPageProps) {
   const [completedSets, setCompletedSets] = useState(0);
   const [workoutStartTime, setWorkoutStartTime] = useState<Date | null>(null);
   const [showMuscleGroups, setShowMuscleGroups] = useState(false);
+  const [isExitDialogOpen, setIsExitDialogOpen] = useState(false);
 
   const defaultExercises: ExtendedExercise[] = [
     {
@@ -89,6 +90,40 @@ export function TimerPage({ onNavigate, workout }: TimerPageProps) {
 
     return () => clearInterval(interval);
   }, [isRunning, timeLeft]);
+
+  // Обработка события ухода со страницы
+  useEffect(() => {
+    // Проверяем, нужно ли показывать подтверждение (если в тренировке больше 1 упражнения)
+    const shouldShowExitConfirmation = totalExercises > 1 && (workoutStartTime || completedExercises > 0 || completedSets > 0);
+    
+    if (!shouldShowExitConfirmation) {
+      return; // Не добавляем обработчики, если подтверждение не нужно
+    }
+
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+      e.returnValue = '';
+    };
+
+    const handlePopState = (e: PopStateEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      setIsExitDialogOpen(true);
+      // Восстанавливаем состояние истории, чтобы пользователь мог остаться на странице
+      history.pushState(null, document.title, location.href);
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    window.addEventListener('popstate', handlePopState);
+
+    // Сохраняем текущее состояние истории
+    history.pushState(null, document.title, location.href);
+
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+      window.removeEventListener('popstate', handlePopState);
+    };
+  }, [workoutStartTime, completedExercises, completedSets, totalExercises]);
 
   // Автоматический сброс таймера на duration текущего упражнения при смене упражнения (если не запущен)
   useEffect(() => {
@@ -319,7 +354,12 @@ export function TimerPage({ onNavigate, workout }: TimerPageProps) {
   return (
     <div className="p-4 space-y-6 min-h-screen bg-gradient-to-b from-primary/5 to-background">
       <div className="flex items-center mb-4">
-        <Button variant="ghost" size="sm" onClick={() => onNavigate('home')} className="mr-4">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => totalExercises > 1 ? setIsExitDialogOpen(true) : onNavigate('home')}
+          className="mr-4"
+        >
           <ArrowLeft className="w-4 h-4 mr-2" />
           Назад
         </Button>
@@ -419,6 +459,37 @@ export function TimerPage({ onNavigate, workout }: TimerPageProps) {
                 Завершить
               </Button>
             </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Диалог подтверждения ухода */}
+      <Dialog open={isExitDialogOpen} onOpenChange={setIsExitDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Подтверждение выхода</DialogTitle>
+            <DialogDescription>
+              Вы уверены, что хотите выйти из тренировки? Весь прогресс будет потерян.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex gap-2 flex-wrap justify-center">
+            <Button
+              onClick={() => setIsExitDialogOpen(false)}
+              variant="outline"
+              size="sm"
+            >
+              Остаться
+            </Button>
+            <Button
+              onClick={() => {
+                setIsExitDialogOpen(false);
+                onNavigate('workouts');
+              }}
+              variant="default"
+              size="sm"
+            >
+              Выйти
+            </Button>
           </div>
         </DialogContent>
       </Dialog>
@@ -538,7 +609,7 @@ export function TimerPage({ onNavigate, workout }: TimerPageProps) {
       {/* Кнопки отмены и завершения */}
         <div className="flex flex-col gap-4">
           <Button
-            onClick={() => onNavigate('home')}
+            onClick={() => setIsExitDialogOpen(true)}
             variant="outline"
             size="lg"
             className="w-full h-12"
