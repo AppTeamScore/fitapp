@@ -8,7 +8,7 @@ import { Textarea } from './ui/textarea';
 import { Checkbox } from './ui/checkbox';
 import { RadioGroup, RadioGroupItem } from './ui/radio-group';
 import { ArrowRight, ArrowLeft, Target, User, Clock, AlertTriangle } from 'lucide-react';
-import { toast } from 'sonner@2.0.3';
+import { toast } from 'sonner';
 import { projectId, publicAnonKey } from '../utils/supabase/info';
 
 interface OnboardingFormProps {
@@ -214,7 +214,7 @@ export function OnboardingForm({ user, onComplete }: OnboardingFormProps) {
                 <Label>Пол</Label>
                 <RadioGroup
                   value={formData.gender}
-                  onValueChange={(value) => setFormData({ ...formData, gender: value })}
+                  onValueChange={(value: string) => setFormData({ ...formData, gender: value })}
                 >
                   <div className="flex items-center space-x-2">
                     <RadioGroupItem value="male" id="male" />
@@ -229,7 +229,7 @@ export function OnboardingForm({ user, onComplete }: OnboardingFormProps) {
               
               <div className="space-y-2">
                 <Label htmlFor="fitnessLevel">Уровень подготовки</Label>
-                <Select onValueChange={(value) => setFormData({ ...formData, fitnessLevel: value })}>
+                <Select onValueChange={(value: string) => setFormData({ ...formData, fitnessLevel: value })}>
                   <SelectTrigger>
                     <SelectValue placeholder="Выберите уровень" />
                   </SelectTrigger>
@@ -237,6 +237,7 @@ export function OnboardingForm({ user, onComplete }: OnboardingFormProps) {
                     <SelectItem value="начинающий">Начинающий</SelectItem>
                     <SelectItem value="средний">Средний</SelectItem>
                     <SelectItem value="продвинутый">Продвинутый</SelectItem>
+                    <SelectItem value="профессионал">Профессионал</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -256,7 +257,7 @@ export function OnboardingForm({ user, onComplete }: OnboardingFormProps) {
             <div className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="primaryGoal">Основная цель</Label>
-                <Select onValueChange={(value) => setFormData({ ...formData, primaryGoal: value })}>
+                <Select onValueChange={(value: string) => setFormData({ ...formData, primaryGoal: value })}>
                   <SelectTrigger>
                     <SelectValue placeholder="Выберите основную цель" />
                   </SelectTrigger>
@@ -298,8 +299,8 @@ export function OnboardingForm({ user, onComplete }: OnboardingFormProps) {
                       <Checkbox
                         id={goal.value}
                         checked={formData.specificGoals.includes(goal.value)}
-                        onCheckedChange={(checked) => 
-                          handleArrayFieldChange('specificGoals', goal.value, checked as boolean)
+                        onCheckedChange={(checked: boolean) =>
+                          handleArrayFieldChange('specificGoals', goal.value, checked)
                         }
                       />
                       <Label htmlFor={goal.value}>{goal.label}</Label>
@@ -323,7 +324,7 @@ export function OnboardingForm({ user, onComplete }: OnboardingFormProps) {
             <div className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="workoutFrequency">Частота тренировок в неделю</Label>
-                <Select onValueChange={(value) => setFormData({ ...formData, workoutFrequency: value })}>
+                <Select onValueChange={(value: string) => setFormData({ ...formData, workoutFrequency: value })}>
                   <SelectTrigger>
                     <SelectValue placeholder="Выберите частоту" />
                   </SelectTrigger>
@@ -338,7 +339,7 @@ export function OnboardingForm({ user, onComplete }: OnboardingFormProps) {
               
               <div className="space-y-2">
                 <Label htmlFor="workoutDuration">Продолжительность тренировки</Label>
-                <Select onValueChange={(value) => setFormData({ ...formData, workoutDuration: value })}>
+                <Select onValueChange={(value: string) => setFormData({ ...formData, workoutDuration: value })}>
                   <SelectTrigger>
                     <SelectValue placeholder="Выберите время" />
                   </SelectTrigger>
@@ -357,8 +358,6 @@ export function OnboardingForm({ user, onComplete }: OnboardingFormProps) {
                   {[
                     { value: 'strength', label: 'Силовые тренировки' },
                     { value: 'cardio', label: 'Кардио' },
-                    { value: 'yoga', label: 'Йога' },
-                    { value: 'pilates', label: 'Пилатес' },
                     { value: 'hiit', label: 'HIIT тренировки' },
                     { value: 'stretching', label: 'Растяжка' }
                   ].map((type) => (
@@ -366,8 +365,8 @@ export function OnboardingForm({ user, onComplete }: OnboardingFormProps) {
                       <Checkbox
                         id={type.value}
                         checked={formData.preferredWorkoutTypes.includes(type.value)}
-                        onCheckedChange={(checked) => 
-                          handleArrayFieldChange('preferredWorkoutTypes', type.value, checked as boolean)
+                        onCheckedChange={(checked: boolean) =>
+                          handleArrayFieldChange('preferredWorkoutTypes', type.value, checked)
                         }
                       />
                       <Label htmlFor={type.value}>{type.label}</Label>
@@ -425,8 +424,8 @@ export function OnboardingForm({ user, onComplete }: OnboardingFormProps) {
                       <Checkbox
                         id={day.value}
                         checked={formData.availableDays.includes(day.value)}
-                        onCheckedChange={(checked) => 
-                          handleArrayFieldChange('availableDays', day.value, checked as boolean)
+                        onCheckedChange={(checked: boolean) =>
+                          handleArrayFieldChange('availableDays', day.value, checked)
                         }
                       />
                       <Label htmlFor={day.value}>{day.label}</Label>
@@ -436,8 +435,22 @@ export function OnboardingForm({ user, onComplete }: OnboardingFormProps) {
               </div>
               
               <div className="space-y-2">
+                <Label htmlFor="equipment">Доступное оборудование</Label>
+                <Select onValueChange={(value: string) => setFormData({ ...formData, equipment: value.split(',') })}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Выберите оборудование" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="home">Домашнее</SelectItem>
+                    <SelectItem value="gym">Тренажерный зал</SelectItem>
+                    <SelectItem value="both">Оба</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div className="space-y-2">
                 <Label htmlFor="preferredTime">Предпочитаемое время тренировок</Label>
-                <Select onValueChange={(value) => setFormData({ ...formData, preferredTime: value })}>
+                <Select onValueChange={(value: string) => setFormData({ ...formData, preferredTime: value })}>
                   <SelectTrigger>
                     <SelectValue placeholder="Выберите время" />
                   </SelectTrigger>

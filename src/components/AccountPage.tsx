@@ -10,7 +10,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { RadioGroup, RadioGroupItem } from './ui/radio-group';
 import { Checkbox } from './ui/checkbox';
 import { Textarea } from './ui/textarea';
-import { toast } from 'sonner@2.0.3';
+import { toast } from 'sonner';
 import { supabase } from '../utils/supabase/client';
 import { projectId } from '../utils/supabase/info';
 
@@ -18,6 +18,7 @@ interface AccountPageProps {
   onNavigate: (page: string) => void;
   onLogout: () => void;
   user: any;
+  onUserUpdated?: () => void;
 }
 
 interface UserProfile {
@@ -43,7 +44,7 @@ interface UserProfile {
   completedAt?: string;
 }
 
-export function AccountPage({ onNavigate, onLogout, user }: AccountPageProps) {
+export function AccountPage({ onNavigate, onLogout, user, onUserUpdated }: AccountPageProps) {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
@@ -84,13 +85,22 @@ export function AccountPage({ onNavigate, onLogout, user }: AccountPageProps) {
       if (response.ok) {
         const result = await response.json();
         // Преобразуем строки в числа для согласованности
-        const normalizedProfile = {
+        let normalizedProfile = {
           ...result.profile,
           age: result.profile.age ? parseInt(result.profile.age) : undefined,
           height: result.profile.height ? parseInt(result.profile.height) : undefined,
           weight: result.profile.weight ? parseInt(result.profile.weight) : undefined,
           targetWeight: result.profile.targetWeight ? parseInt(result.profile.targetWeight) : undefined,
         };
+        
+        // Если имя не загружено из профиля, используем из метаданных пользователя
+        if (!normalizedProfile.name && user?.user_metadata?.name) {
+          normalizedProfile = {
+            ...normalizedProfile,
+            name: user.user_metadata.name
+          };
+        }
+        
         setProfile(normalizedProfile);
         setEditedProfile(normalizedProfile);
       } else {
@@ -127,18 +137,23 @@ export function AccountPage({ onNavigate, onLogout, user }: AccountPageProps) {
 
       if (response.ok) {
         const result = await response.json();
-        // Преобразуем строки в числа для согласованности
-        const normalizedProfile = {
-          ...result.profile,
-          age: result.profile.age ? parseInt(result.profile.age) : undefined,
-          height: result.profile.height ? parseInt(result.profile.height) : undefined,
-          weight: result.profile.weight ? parseInt(result.profile.weight) : undefined,
-          targetWeight: result.profile.targetWeight ? parseInt(result.profile.targetWeight) : undefined,
-        };
-        setProfile(normalizedProfile);
-        setEditedProfile(normalizedProfile);
+        // Обновляем метаданные пользователя для имени
+        const { error: metadataError } = await supabase.auth.updateUser({
+          data: { name: editedProfile.name }
+        });
+
+        if (metadataError) {
+          console.error('Ошибка обновления имени пользователя:', metadataError);
+          toast.warning('Профиль обновлен, но имя пользователя может не обновиться');
+        }
+
+        // Перезагружаем профиль для получения обновленных данных
+        await loadProfile();
         setIsEditing(false);
         toast.success('Профиль обновлен!');
+        if (onUserUpdated) {
+          onUserUpdated();
+        }
       } else {
         toast.error('Ошибка сохранения профиля');
       }
@@ -231,7 +246,7 @@ export function AccountPage({ onNavigate, onLogout, user }: AccountPageProps) {
     }
   };
 
-  const updateEditedProfile = (field: string, value: any) => {
+  const updateEditedProfile = (field: keyof UserProfile, value: any) => {
     if (!editedProfile) return;
     // Парсим числа
     if (['age', 'height', 'weight', 'targetWeight'].includes(field)) {
@@ -355,7 +370,7 @@ export function AccountPage({ onNavigate, onLogout, user }: AccountPageProps) {
                 <Label>Пол</Label>
                 <RadioGroup
                   value={editedProfile.gender || ''}
-                  onValueChange={(value) => updateEditedProfile('gender', value)}
+                  onValueChange={(value: string) => updateEditedProfile('gender', value)}
                 >
                   <div className="flex items-center space-x-2">
                     <RadioGroupItem value="male" id="male-edit" />
@@ -384,7 +399,7 @@ export function AccountPage({ onNavigate, onLogout, user }: AccountPageProps) {
                 <Label>Основная цель</Label>
                 <Select
                   value={editedProfile.primaryGoal || ''}
-                  onValueChange={(value) => updateEditedProfile('primaryGoal', value)}
+                  onValueChange={(value: string) => updateEditedProfile('primaryGoal', value)}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Выберите цель" />
@@ -414,7 +429,7 @@ export function AccountPage({ onNavigate, onLogout, user }: AccountPageProps) {
                       <Checkbox
                         id={`specific-${goal.value}`}
                         checked={(editedProfile.specificGoals || []).includes(goal.value)}
-                        onCheckedChange={(checked) => {
+                        onCheckedChange={(checked: boolean) => {
                           const current = editedProfile.specificGoals || [];
                           if (checked) {
                             updateEditedProfile('specificGoals', [...current, goal.value]);
@@ -433,7 +448,7 @@ export function AccountPage({ onNavigate, onLogout, user }: AccountPageProps) {
                 <Label>Уровень подготовки</Label>
                 <Select
                   value={editedProfile.fitnessLevel || ''}
-                  onValueChange={(value) => updateEditedProfile('fitnessLevel', value)}
+                  onValueChange={(value: string) => updateEditedProfile('fitnessLevel', value)}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Выберите уровень" />
@@ -442,6 +457,7 @@ export function AccountPage({ onNavigate, onLogout, user }: AccountPageProps) {
                     <SelectItem value="начинающий">Начинающий</SelectItem>
                     <SelectItem value="средний">Средний</SelectItem>
                     <SelectItem value="продвинутый">Продвинутый</SelectItem>
+                    <SelectItem value="профессионал">Профессионал</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -451,16 +467,16 @@ export function AccountPage({ onNavigate, onLogout, user }: AccountPageProps) {
                   <Label>Частота тренировок</Label>
                   <Select
                     value={editedProfile.workoutFrequency || ''}
-                    onValueChange={(value) => updateEditedProfile('workoutFrequency', value)}
+                    onValueChange={(value: string) => updateEditedProfile('workoutFrequency', value)}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Выберите частоту" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="2-3">2-3 раза в неделю</SelectItem>
-                      <SelectItem value="3-4">3-4 раза в неделю</SelectItem>
                       <SelectItem value="4-5">4-5 раз в неделю</SelectItem>
                       <SelectItem value="6-7">6-7 раз в неделю</SelectItem>
+                      <SelectItem value="daily">Каждый день</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -468,16 +484,16 @@ export function AccountPage({ onNavigate, onLogout, user }: AccountPageProps) {
                   <Label>Длительность тренировки</Label>
                   <Select
                     value={editedProfile.workoutDuration || ''}
-                    onValueChange={(value) => updateEditedProfile('workoutDuration', value)}
+                    onValueChange={(value: string) => updateEditedProfile('workoutDuration', value)}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Выберите длительность" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="20-30">20-30 минут</SelectItem>
+                      <SelectItem value="15-30">15-30 минут</SelectItem>
                       <SelectItem value="30-45">30-45 минут</SelectItem>
                       <SelectItem value="45-60">45-60 минут</SelectItem>
-                      <SelectItem value="60+">60+ минут</SelectItem>
+                      <SelectItem value="60+">Более часа</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -489,8 +505,6 @@ export function AccountPage({ onNavigate, onLogout, user }: AccountPageProps) {
                   {[
                     { value: 'strength', label: 'Силовые тренировки' },
                     { value: 'cardio', label: 'Кардио' },
-                    { value: 'yoga', label: 'Йога' },
-                    { value: 'pilates', label: 'Пилатес' },
                     { value: 'hiit', label: 'HIIT тренировки' },
                     { value: 'stretching', label: 'Растяжка' }
                   ].map((type) => (
@@ -498,7 +512,7 @@ export function AccountPage({ onNavigate, onLogout, user }: AccountPageProps) {
                       <Checkbox
                         id={`type-${type.value}`}
                         checked={(editedProfile.preferredWorkoutTypes || []).includes(type.value)}
-                        onCheckedChange={(checked) => {
+                        onCheckedChange={(checked: boolean) => {
                           const current = editedProfile.preferredWorkoutTypes || [];
                           if (checked) {
                             updateEditedProfile('preferredWorkoutTypes', [...current, type.value]);
@@ -547,7 +561,7 @@ export function AccountPage({ onNavigate, onLogout, user }: AccountPageProps) {
                       <Checkbox
                         id={`day-${day.value}`}
                         checked={(editedProfile.availableDays || []).includes(day.value)}
-                        onCheckedChange={(checked) => {
+                        onCheckedChange={(checked: boolean) => {
                           const current = editedProfile.availableDays || [];
                           if (checked) {
                             updateEditedProfile('availableDays', [...current, day.value]);
@@ -567,7 +581,7 @@ export function AccountPage({ onNavigate, onLogout, user }: AccountPageProps) {
                   <Label>Предпочитаемое время тренировок</Label>
                   <Select
                     value={editedProfile.preferredTime || ''}
-                    onValueChange={(value) => updateEditedProfile('preferredTime', value)}
+                    onValueChange={(value: string) => updateEditedProfile('preferredTime', value)}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Выберите время" />
@@ -584,7 +598,7 @@ export function AccountPage({ onNavigate, onLogout, user }: AccountPageProps) {
                   <Label>Доступное оборудование</Label>
                   <Select
                     value={editedProfile.equipment ? editedProfile.equipment.join(',') : ''}
-                    onValueChange={(value) => updateEditedProfile('equipment', value.split(',').map(s => s.trim()))}
+                    onValueChange={(value: string) => updateEditedProfile('equipment', value.split(',').map((s: string) => s.trim()))}
                     placeholder="Выберите оборудование"
                   >
                     <SelectTrigger>

@@ -233,13 +233,18 @@ export default function App() {
       case 'stats':
         return <StatsPage onNavigate={handleNavigate} />;
       case 'account':
-        return <AccountPage onNavigate={handleNavigate} onLogout={handleLogout} user={user} />;
+        return <AccountPage onNavigate={handleNavigate} onLogout={handleLogout} user={user} onUserUpdated={async () => {
+          const { data: { user: updatedUser } } = await supabase.auth.getUser();
+          if (updatedUser) {
+            setUser(updatedUser);
+          }
+        }} />;
       default:
         return <HomePage onNavigate={handleNavigate} user={user} onLogout={handleLogout} />;
     }
   };
 
-  const showBottomNav = ['home', 'workouts', 'calendar', 'stats', 'account'].includes(currentPage);
+  const showBottomNav = ['home', 'workouts', 'calendar', 'exercises', 'account'].includes(currentPage);
   const showWithPadding = showBottomNav && currentPage !== 'timer';
 
   // Сохранение стека в localStorage для восстановления

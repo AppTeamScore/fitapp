@@ -1,9 +1,10 @@
 import { useState } from "react";
-import { ArrowLeft, Search, Filter, Video, Clock, Target, Play } from "lucide-react";
+import { ArrowLeft, Search, Filter, Video, Clock, Target, Play, ChevronDown, ChevronUp } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
 import { Input } from "./ui/input";
+import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "./ui/collapsible";
 import { exerciseData, exercisesByCategory, type Exercise } from "../data/exercises";
 import { VideoPlayer } from "./VideoPlayer";
 
@@ -16,17 +17,25 @@ export function ExercisesLibraryPage({ onNavigate, onStartWorkout }: ExercisesLi
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("Все");
   const [selectedDifficulty, setSelectedDifficulty] = useState("Все");
+  const [selectedMuscleGroup, setSelectedMuscleGroup] = useState("Все");
   const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(null);
 
-  const categories = ["Все", "Кардио", "Сила", "Пресс", "HIIT", "Растяжка"];
+  const categories = ["Все", "Кардио", "Сила", "HIIT", "Растяжка"];
   const difficulties = ["Все", "Легко", "Средне", "Сложно"];
+  
+  // Создаем список уникальных мышечных групп
+  const allMuscleGroups = Array.from(
+    new Set(exerciseData.flatMap(exercise => exercise.muscleGroups))
+  );
+  const muscleGroups = ["Все", ...allMuscleGroups];
 
   const filteredExercises = exerciseData.filter(exercise => {
     const matchesSearch = exercise.name.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = selectedCategory === "Все" || exercise.category === selectedCategory;
     const matchesDifficulty = selectedDifficulty === "Все" || exercise.difficulty === selectedDifficulty;
+    const matchesMuscleGroup = selectedMuscleGroup === "Все" || exercise.muscleGroups.includes(selectedMuscleGroup);
     
-    return matchesSearch && matchesCategory && matchesDifficulty;
+    return matchesSearch && matchesCategory && matchesDifficulty && matchesMuscleGroup;
   });
 
 
@@ -76,38 +85,93 @@ export function ExercisesLibraryPage({ onNavigate, onStartWorkout }: ExercisesLi
       </div>
 
       {/* Фильтры */}
-      <div className="space-y-4">
-        <div>
-          <h3 className="font-medium mb-2">Категория</h3>
-          <div className="flex flex-wrap gap-2">
-            {categories.map((category) => (
-              <Button
-                key={category}
-                variant={selectedCategory === category ? "default" : "outline"}
-                size="sm"
-                onClick={() => setSelectedCategory(category)}
-              >
-                {category}
-              </Button>
-            ))}
-          </div>
-        </div>
+      <div className="space-y-3">
+        {/* Категория */}
+        <Collapsible>
+          <CollapsibleTrigger className="flex items-center justify-between w-full p-2 border rounded-lg hover:bg-muted/50">
+            <h3 className="font-medium">Категория</h3>
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-muted-foreground">{selectedCategory}</span>
+              {selectedCategory === "Все" ? (
+                <ChevronDown className="h-4 w-4" />
+              ) : (
+                <ChevronUp className="h-4 w-4" />
+              )}
+            </div>
+          </CollapsibleTrigger>
+          <CollapsibleContent className="mt-2">
+            <div className="flex flex-wrap gap-2 p-2">
+              {categories.map((category) => (
+                <Button
+                  key={category}
+                  variant={selectedCategory === category ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setSelectedCategory(category)}
+                >
+                  {category}
+                </Button>
+              ))}
+            </div>
+          </CollapsibleContent>
+        </Collapsible>
 
-        <div>
-          <h3 className="font-medium mb-2">Сложность</h3>
-          <div className="flex flex-wrap gap-2">
-            {difficulties.map((difficulty) => (
-              <Button
-                key={difficulty}
-                variant={selectedDifficulty === difficulty ? "default" : "outline"}
-                size="sm"
-                onClick={() => setSelectedDifficulty(difficulty)}
-              >
-                {difficulty}
-              </Button>
-            ))}
-          </div>
-        </div>
+        {/* Сложность */}
+        <Collapsible>
+          <CollapsibleTrigger className="flex items-center justify-between w-full p-2 border rounded-lg hover:bg-muted/50">
+            <h3 className="font-medium">Сложность</h3>
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-muted-foreground">{selectedDifficulty}</span>
+              {selectedDifficulty === "Все" ? (
+                <ChevronDown className="h-4 w-4" />
+              ) : (
+                <ChevronUp className="h-4 w-4" />
+              )}
+            </div>
+          </CollapsibleTrigger>
+          <CollapsibleContent className="mt-2">
+            <div className="flex flex-wrap gap-2 p-2">
+              {difficulties.map((difficulty) => (
+                <Button
+                  key={difficulty}
+                  variant={selectedDifficulty === difficulty ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setSelectedDifficulty(difficulty)}
+                >
+                  {difficulty}
+                </Button>
+              ))}
+            </div>
+          </CollapsibleContent>
+        </Collapsible>
+
+        {/* Мышечная группа */}
+        <Collapsible>
+          <CollapsibleTrigger className="flex items-center justify-between w-full p-2 border rounded-lg hover:bg-muted/50">
+            <h3 className="font-medium">Мышечная группа</h3>
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-muted-foreground">{selectedMuscleGroup}</span>
+              {selectedMuscleGroup === "Все" ? (
+                <ChevronDown className="h-4 w-4" />
+              ) : (
+                <ChevronUp className="h-4 w-4" />
+              )}
+            </div>
+          </CollapsibleTrigger>
+          <CollapsibleContent className="mt-2">
+            <div className="flex flex-wrap gap-2 p-2">
+              {muscleGroups.map((muscleGroup) => (
+                <Button
+                  key={muscleGroup}
+                  variant={selectedMuscleGroup === muscleGroup ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setSelectedMuscleGroup(muscleGroup)}
+                >
+                  {muscleGroup}
+                </Button>
+              ))}
+            </div>
+          </CollapsibleContent>
+        </Collapsible>
       </div>
 
       {/* Статистика */}
@@ -115,13 +179,13 @@ export function ExercisesLibraryPage({ onNavigate, onStartWorkout }: ExercisesLi
         <Card>
           <CardContent className="p-4 text-center">
             <div className="text-2xl font-bold">{filteredExercises.length}</div>
-            <div className="text-sm text-muted-foreground">Найдено</div>
+            <div className="text-sm text-muted-foreground">Упражнений</div>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-4 text-center">
-            <div className="text-2xl font-bold">{exerciseData.length}</div>
-            <div className="text-sm text-muted-foreground">Всего</div>
+            <div className="text-2xl font-bold">{muscleGroups.length}</div>
+            <div className="text-sm text-muted-foreground">Мышечных групп</div>
           </CardContent>
         </Card>
         <Card>

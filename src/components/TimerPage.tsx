@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Play, Pause, RotateCcw, SkipForward, Info, ArrowLeft, MoonStar, SquareMinus, SquarePlus, Square } from "lucide-react";
+import { Play, Pause, RotateCcw, SkipForward, Info, ArrowLeft, MoonStar, SquareMinus, SquarePlus, Square, ChevronDown } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "./ui/dialog";
 import { Button } from "./ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
@@ -33,6 +33,7 @@ export function TimerPage({ onNavigate, workout }: TimerPageProps) {
   const [completedExercises, setCompletedExercises] = useState(0);
   const [completedSets, setCompletedSets] = useState(0);
   const [workoutStartTime, setWorkoutStartTime] = useState<Date | null>(null);
+  const [showMuscleGroups, setShowMuscleGroups] = useState(false);
 
   const defaultExercises: ExtendedExercise[] = [
     {
@@ -335,18 +336,32 @@ export function TimerPage({ onNavigate, workout }: TimerPageProps) {
           <CardTitle className="text-2xl mb-2">
             {currentExercise?.name || "Упражнение"}
           </CardTitle>
-          <div className="flex justify-center gap-2 mb-4">
+          <div className="flex justify-center gap-2 mb-4 flex-wrap">
             <Badge variant="secondary" className="text-xs">
               {currentExercise?.category}
             </Badge>
-            <Badge variant="outline" className="text-xs">
-              {currentExercise?.muscleGroups?.join(", ")}
-            </Badge>
-            {currentSets > 1 && (
-              <Badge variant="default" className="text-xs">
-                Подход {currentSetIndex + 1} из {currentSets}
+            <div className="relative" onMouseEnter={() => setShowMuscleGroups(true)}
+                 onMouseLeave={() => setShowMuscleGroups(false)}>
+              <Badge variant="outline" className="text-xs h-8 cursor-pointer hover:bg-accent/50 transition-colors">
+                {currentExercise?.muscleGroups?.join(", ") || "Нет групп"}
+                {currentExercise?.muscleGroups && currentExercise.muscleGroups.length > 2 && (
+                  <ChevronDown className="w-3 h-3 ml-1 inline" />
+                )}
               </Badge>
-            )}
+              {currentExercise?.muscleGroups && currentExercise.muscleGroups.length > 2 && showMuscleGroups && (
+                <div className="absolute top-full left-0 mt-1 p-2 bg-background border border-border rounded-md shadow-md z-10 min-w-[150px] max-w-xs">
+                  <div className="text-xs text-muted-foreground mb-1">Все группы мышц:</div>
+                  <div className="text-xs space-y-1 max-h-32 overflow-y-auto">
+                    {currentExercise.muscleGroups.map((group, index) => (
+                      <div key={index} className="flex items-center">
+                        <div className="w-1 h-1 bg-primary rounded-full mr-2"></div>
+                        {group}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         </CardHeader>
         <CardContent className="space-y-6">
@@ -357,7 +372,7 @@ export function TimerPage({ onNavigate, workout }: TimerPageProps) {
                 key={`${currentExercise.video}-${currentSetIndex}`} // Ключ для перезапуска видео на новом подходе
                 videoSrc={currentExercise.video}
                 exerciseName={currentExercise.name}
-                autoPlay={isRunning}
+                autoPlay={true}
                 loop={true}
                 muted={true}
               />
@@ -386,11 +401,11 @@ export function TimerPage({ onNavigate, workout }: TimerPageProps) {
           </DialogHeader>
           <div className="space-y-4">
             <div className="flex items-center gap-4 justify-center">
-              <Button onClick={() => adjustRestTime(-10)} variant="outline" size="lg" className="rounded-full w-12 h-12 shadow-lg">
+              <Button onClick={() => adjustRestTime(-10)} variant="outline" size="lg" className="rounded-full w-12 h-12">
                 <SquareMinus className="h-12 w-12" />
               </Button>
               <span className="text-6xl font-bold text-primary justify-center flex items-center">{formatTime(restTimeLeft)}</span>
-              <Button onClick={() => adjustRestTime(10)} variant="outline" size="lg" className="rounded-full w-12 h-12 shadow-lg">
+              <Button onClick={() => adjustRestTime(10)} variant="outline" size="lg" className="rounded-full w-12 h-12">
                 <SquarePlus className="h-12 w-12" />
               </Button>
             </div>
@@ -430,11 +445,11 @@ export function TimerPage({ onNavigate, workout }: TimerPageProps) {
         </CardHeader>
         <CardContent className="flex flex-col items-center space-y-6">
           <div className="flex items-center gap-6 justify-center">
-              <Button onClick={() => adjusTimerLeft(-10)} variant="outline" size="lg" className="rounded-full w-12 h-12 shadow-lg">
+              <Button onClick={() => adjusTimerLeft(-10)} variant="outline" size="lg" className="rounded-full w-12 h-12">
                 <SquareMinus className="h-12 w-12" />
               </Button>
               <span className="text-6xl font-bold text-primary justify-center flex items-center">{formatTime(timeLeft)}</span>
-              <Button onClick={() => adjusTimerLeft(10)} variant="outline" size="lg" className="rounded-full w-12 h-12 shadow-lg">
+              <Button onClick={() => adjusTimerLeft(10)} variant="outline" size="lg" className="rounded-full w-12 h-12">
                 <SquarePlus className="h-12 w-12" />
               </Button>
           </div>

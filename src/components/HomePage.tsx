@@ -179,14 +179,14 @@ export function HomePage({ onNavigate, user, onLogout }: HomePageProps) {
               className="h-20 flex-col gap-2 bg-gradient-to-br from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white border-0"
             >
               <Play className="h-6 w-6" />
-              <span className="text-sm">Тренировка</span>
+              <span className="text-sm">Готовые тренировки</span>
             </Button>
             <Button 
               onClick={() => onNavigate('plan')}
               className="h-20 flex-col gap-2 bg-gradient-to-br from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white border-0"
             >
               <Target className="h-6 w-6" />
-              <span className="text-sm">Мой план</span>
+              <span className="text-sm">Индивидуальный план</span>
             </Button>
           </div>
         </div>
@@ -225,7 +225,7 @@ export function HomePage({ onNavigate, user, onLogout }: HomePageProps) {
                 </div>
               </div>
             </Button>
-            <Button 
+            <Button
               onClick={() => onNavigate('stats')}
               className="h-14 text-left justify-start bg-card hover:bg-accent text-foreground"
               variant="outline"

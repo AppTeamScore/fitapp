@@ -1,4 +1,4 @@
-import { Home, Dumbbell, Calendar, BarChart3, User } from "lucide-react";
+import { Home, Dumbbell, Calendar, BookOpen, User, BicepsFlexed } from "lucide-react";
 import { Button } from "./ui/button";
 
 interface BottomNavigationProps {
@@ -9,9 +9,9 @@ interface BottomNavigationProps {
 export function BottomNavigation({ currentPage, onNavigate }: BottomNavigationProps) {
   const navItems = [
     { id: 'home', label: 'Главная', icon: Home },
-    { id: 'workouts', label: 'Тренировки', icon: Dumbbell },
+    { id: 'exercises', label: 'Упражнения', icon: BicepsFlexed },
+    { id: 'workouts', label: 'Тренировка', icon: Dumbbell },
     { id: 'calendar', label: 'Календарь', icon: Calendar },
-    { id: 'stats', label: 'Статистика', icon: BarChart3 },
     { id: 'account', label: 'Профиль', icon: User },
   ];
 
@@ -26,7 +26,7 @@ export function BottomNavigation({ currentPage, onNavigate }: BottomNavigationPr
               variant="ghost"
               size="sm"
               onClick={() => onNavigate(item.id)}
-              className={`flex-col h-16 w-16 p-1 transition-colors ${
+              className={`flex-col h-16 w-18 p-1 transition-colors ${
                 isActive 
                   ? 'text-primary bg-primary/10' 
                   : 'text-muted-foreground hover:text-foreground hover:bg-accent'
